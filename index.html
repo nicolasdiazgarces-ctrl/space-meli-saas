@@ -1,0 +1,3038 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space MELI × Nicolas Diaz</title>
+<style>
+:root {
+  --bg: #050510; --bg2: #0a0a1e; --bg3: #0f0f28;
+  --card: rgba(255,255,255,0.04); --card2: rgba(255,255,255,0.07);
+  --border: rgba(255,255,255,0.08); --glow: rgba(99,179,237,0.3);
+  --cyan: #63b3ed; --cyan2: #90cdf4; --purple: #b794f4;
+  --gold: #f6ad55; --green: #68d391; --red: #fc8181;
+  --text: #e2e8f0; --dim: #718096; --muted: #4a5568;
+  --r: 12px; --rl: 18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 20% 30%,rgba(99,179,237,.06),transparent 50%),radial-gradient(circle at 80% 70%,rgba(183,148,244,.06),transparent 50%);pointer-events:none}
+
+/* LAYOUT */
+.app{display:flex;height:100vh;overflow:hidden;position:relative;z-index:1}
+.sidebar{width:240px;flex-shrink:0;background:rgba(4,4,16,.98);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;box-shadow:4px 0 24px rgba(0,0,0,.4)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* SIDEBAR HEADER / LOGO */
+.brand-block{padding:22px 18px 18px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(99,179,237,.04) 0%,transparent 100%)}
+.brand-logo-wrap{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.brand-logo{width:48px;height:48px;background:linear-gradient(135deg,var(--cyan) 0%,#4299e1 50%,var(--purple) 100%);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:0 4px 20px rgba(99,179,237,.35),0 0 0 1px rgba(99,179,237,.2)}
+.brand-text{}
+.brand-name{font-size:15px;font-weight:900;letter-spacing:.04em;background:linear-gradient(90deg,var(--cyan) 0%,#90cdf4 50%,var(--purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1}
+.brand-sub{font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.brand-badge{display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:3px 10px;background:rgba(99,179,237,.08);border:1px solid rgba(99,179,237,.15);border-radius:20px;font-size:9px;color:var(--cyan);font-weight:700;letter-spacing:.06em}
+
+/* PRODUCT INPUT */
+.product-block{padding:14px;border-bottom:1px solid var(--border)}
+.product-block label{font-size:9px;font-weight:700;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:6px}
+.product-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;color:var(--text);font-size:12px;outline:none;transition:all .2s;resize:none;font-family:inherit;min-height:58px;line-height:1.5}
+.product-input:focus{border-color:rgba(99,179,237,.5);background:rgba(99,179,237,.04);box-shadow:0 0 0 3px rgba(99,179,237,.07)}
+.product-input::placeholder{color:var(--muted)}
+.btn-ia{width:100%;margin-top:8px;padding:10px;background:linear-gradient(135deg,#3b82f6,var(--cyan));color:#fff;border:none;border-radius:var(--r);font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;letter-spacing:.04em;box-shadow:0 2px 12px rgba(99,179,237,.25)}
+.btn-ia:hover{opacity:.92;transform:translateY(-1px);box-shadow:0 4px 20px rgba(99,179,237,.35)}
+.btn-ia:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* SIDEBAR NAV */
+.nav{flex:1;overflow-y:auto;padding:8px 10px 6px;scrollbar-width:none;display:flex;flex-direction:column;gap:1px}
+.nav::-webkit-scrollbar{display:none}
+.nav-section{font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:10px 12px 4px;margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:all .18s;border-radius:10px;font-size:12px;color:var(--dim);border:1px solid transparent;user-select:none}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.07)}
+.nav-item.active{color:#e2e8f0;background:linear-gradient(135deg,rgba(99,179,237,.16),rgba(183,148,244,.10));border-color:rgba(99,179,237,.22);box-shadow:0 2px 14px rgba(99,179,237,.08)}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 5px rgba(99,179,237,.7))}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0;transition:filter .2s}
+.nav-label{font-weight:600;font-size:11.5px;letter-spacing:.01em;flex:1}
+.nav-item.active .nav-label{color:var(--cyan2)}
+
+/* SIDEBAR FOOTER */
+.sidebar-footer{padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.btn-cfg{width:100%;padding:9px 12px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;color:var(--dim);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;font-family:inherit;font-weight:600}
+.btn-cfg:hover{background:rgba(255,255,255,.06);color:var(--text);border-color:rgba(255,255,255,.12)}
+.btn-notion{width:100%;padding:9px 12px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;color:var(--dim);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;font-family:inherit;font-weight:600;text-decoration:none}
+.btn-notion:hover{background:rgba(255,255,255,.06);color:var(--text);border-color:rgba(255,255,255,.12)}
+
+/* MAIN HEADER */
+.main-header{padding:14px 22px;border-bottom:1px solid var(--border);background:rgba(4,4,16,.85);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;backdrop-filter:blur(24px)}
+.main-header h2{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.header-title{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:9px}
+.header-icon{font-size:18px}
+.status-pill{font-size:9px;padding:4px 10px;border-radius:20px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.status-pill.ready{background:rgba(104,211,145,.12);color:var(--green);border:1px solid rgba(104,211,145,.2)}
+.status-pill.loading{background:rgba(99,179,237,.12);color:var(--cyan);border:1px solid rgba(99,179,237,.2)}
+.status-pill.error{background:rgba(252,129,129,.12);color:var(--red);border:1px solid rgba(252,129,129,.2)}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:22px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.08) transparent}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
+.panel{display:none}
+.panel.active{display:block}
+
+/* CARDS */
+.card{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-radius:var(--rl);padding:18px;margin-bottom:14px;transition:border-color .2s}
+.card:hover{border-color:rgba(255,255,255,.1)}
+.card-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+
+/* BUTTONS */
+.btn-gen{width:100%;padding:13px;background:linear-gradient(135deg,rgba(99,179,237,.12),rgba(183,148,244,.1));border:1px solid rgba(99,179,237,.25);border-radius:var(--r);color:var(--cyan2);font-size:12px;font-weight:700;cursor:pointer;transition:all .22s;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;letter-spacing:.02em}
+.btn-gen:hover{background:linear-gradient(135deg,rgba(99,179,237,.2),rgba(183,148,244,.18));border-color:rgba(99,179,237,.5);box-shadow:0 4px 20px rgba(99,179,237,.12);transform:translateY(-1px)}
+.btn-gen:active{transform:translateY(0)}
+.btn-gen:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-sm{padding:5px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:var(--dim);font-size:10px;font-weight:600;cursor:pointer;transition:all .18s;font-family:inherit}
+.btn-sm:hover{background:rgba(255,255,255,.07);color:var(--text);border-color:rgba(255,255,255,.12)}
+.btn-sm.c{color:var(--cyan);border-color:rgba(99,179,237,.25);background:rgba(99,179,237,.06)}
+.btn-sm.c:hover{background:rgba(99,179,237,.12);border-color:rgba(99,179,237,.4)}
+.btn-sm.p{color:var(--purple);border-color:rgba(183,148,244,.25);background:rgba(183,148,244,.06)}
+.btn-sm.p:hover{background:rgba(183,148,244,.12);border-color:rgba(183,148,244,.4)}
+
+/* INPUT FIELD GENERAL */
+.input-field{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:8px 11px;color:var(--text);font-size:12px;outline:none;transition:all .2s;font-family:inherit}
+.input-field:focus{border-color:rgba(99,179,237,.4);background:rgba(99,179,237,.04);box-shadow:0 0 0 3px rgba(99,179,237,.06)}
+
+/* SPINNER */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(99,179,237,.3);border-top-color:var(--cyan);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading{text-align:center;padding:30px;color:var(--dim);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:10px}
+
+/* TITLES */
+.title-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 40px 10px 12px;margin-bottom:8px;cursor:pointer;transition:all .2s;position:relative}
+.title-item:hover{border-color:var(--glow);background:var(--card2);transform:translateX(3px)}
+.t-cat{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+.t-text{font-size:12px;font-weight:500}
+.t-chars{position:absolute;top:10px;right:10px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px}
+.t-chars.ok{background:rgba(104,211,145,.15);color:var(--green)}
+.t-chars.long{background:rgba(252,129,129,.15);color:var(--red)}
+
+/* OUTPUT AREAS */
+.output-area{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:12px;white-space:pre-wrap;word-break:break-word;line-height:1.7;min-height:80px;color:var(--text);font-family:inherit}
+.output-area.brand{background:rgba(183,148,244,.04);border-color:rgba(183,148,244,.2)}
+.output-area.price{background:rgba(246,173,85,.04);border-color:rgba(246,173,85,.2)}
+.output-area.answer{background:rgba(99,179,237,.04);border-color:rgba(99,179,237,.2)}
+.char-count{font-size:10px;color:var(--muted);text-align:right;margin-top:4px}
+.row-btns{display:flex;gap:6px;margin-bottom:12px;justify-content:flex-end}
+
+/* AUDIT */
+.audit-ring-wrap{display:flex;flex-direction:column;align-items:center;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:12px;text-align:center}
+.audit-ring{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;position:relative;margin-bottom:6px}
+.audit-ring::before{content:'';position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(var(--rc,var(--cyan)) var(--rp,0%),rgba(255,255,255,.06) 0%);z-index:-1}
+.audit-ring::after{content:'';position:absolute;inset:2px;border-radius:50%;background:var(--bg2);z-index:-1}
+.audit-nivel{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.audit-veredicto{font-size:11px;color:var(--dim);margin-top:4px}
+.audit-section{margin-bottom:12px}
+.audit-section-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.audit-item{background:var(--card);border-left:3px solid var(--border);border-radius:0 8px 8px 0;padding:8px 10px;margin-bottom:6px;font-size:12px}
+.audit-item.e{border-left-color:var(--red);background:rgba(252,129,129,.05)}
+.audit-item.m{border-left-color:var(--gold);background:rgba(246,173,85,.05)}
+
+/* SPY */
+.spy-item{background:var(--card);border-radius:var(--r);padding:10px 12px;border-left:3px solid var(--border);font-size:12px;margin-bottom:7px}
+.spy-item.QUEJA{border-left-color:var(--red)}
+.spy-item.VALOR{border-left-color:var(--green)}
+.spy-item.OPORTUNIDAD{border-left-color:var(--gold)}
+.spy-item.KEYWORD{border-left-color:var(--cyan)}
+.spy-item.OBJECIÓN{border-left-color:var(--purple)}
+.spy-type{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px}
+.spy-item.QUEJA .spy-type{color:var(--red)}
+.spy-item.VALOR .spy-type{color:var(--green)}
+.spy-item.OPORTUNIDAD .spy-type{color:var(--gold)}
+.spy-item.KEYWORD .spy-type{color:var(--cyan)}
+.spy-item.OBJECIÓN .spy-type{color:var(--purple)}
+
+/* IMAGES */
+.shot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.shot-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:8px;cursor:pointer;transition:all .2s;text-align:left;font-family:inherit}
+.shot-btn.sel{border-color:var(--cyan);background:rgba(99,179,237,.08)}
+.shot-btn-cat{font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.shot-btn-name{font-size:9px;font-weight:600;color:var(--text);margin-top:2px}
+.img-upload{border:2px dashed var(--border);border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;transition:all .2s;position:relative;margin-bottom:10px}
+.img-upload:hover{border-color:var(--cyan);background:rgba(99,179,237,.04)}
+.img-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+/* MULTI-PHOTO GRID */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.photo-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .2s;background:rgba(255,255,255,.04)}
+.photo-item img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-item.primary{border-color:var(--cyan);box-shadow:0 0 0 1px rgba(99,179,237,.3)}
+.photo-del{position:absolute;top:4px;right:4px;width:18px;height:18px;background:rgba(0,0,0,.75);border:none;border-radius:50%;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .18s;z-index:2;line-height:1}
+.photo-item:hover .photo-del{opacity:1}
+.photo-badge{position:absolute;bottom:4px;left:4px;background:var(--cyan);color:#000;font-size:7px;font-weight:800;padding:2px 5px;border-radius:4px;letter-spacing:.05em;pointer-events:none}
+.photo-add{border:2px dashed var(--border);border-radius:10px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:var(--dim);flex-direction:column;gap:3px;position:relative;font-size:10px}
+.photo-add:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(99,179,237,.04)}
+.photo-add input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-progress{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin:10px 0;display:none}
+.img-progress.show{display:block}
+.prog-bar-wrap{background:rgba(255,255,255,.05);border-radius:4px;height:4px;margin:8px 0;overflow:hidden}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:4px;transition:width .3s}
+.imgs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.img-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s}
+.img-card:hover{border-color:var(--glow)}
+.img-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.img-card-info{padding:7px 8px;display:flex;align-items:center;justify-content:space-between}
+.img-card-label{font-size:9px;color:var(--dim);font-weight:600}
+.img-card-dl{background:none;border:none;color:var(--cyan);cursor:pointer;font-size:15px;padding:0;line-height:1}
+.img-card-loading{aspect-ratio:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--muted);font-size:9px}
+
+/* FORMS */
+.form-group{margin-bottom:10px}
+.form-label{font-size:10px;font-weight:600;color:var(--dim);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:4px}
+.form-input,.form-textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:12px;outline:none;transition:border-color .2s;font-family:inherit}
+.form-input:focus,.form-textarea:focus{border-color:var(--purple);background:rgba(183,148,244,.06)}
+.form-textarea{min-height:70px;resize:vertical}
+
+/* PRICE */
+.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.price-metric{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center}
+.pm-val{font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--gold),#ed8936);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pm-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+
+/* CONFIG MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(5,5,16,.9);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:24px;width:400px;max-width:90vw}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-title{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;line-height:1;padding:2px}
+.modal-close:hover{color:var(--text)}
+.cfg-input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;color:var(--text);font-size:11px;outline:none;font-family:'Courier New',monospace;margin-top:5px;transition:border-color .2s}
+.cfg-input:focus{border-color:var(--cyan)}
+.cfg-hint{font-size:10px;color:var(--muted);margin-top:3px}
+.cfg-hint a{color:var(--cyan);cursor:pointer}
+.btn-save{width:100%;padding:11px;background:linear-gradient(135deg,var(--cyan),#4299e1);color:#050510;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;margin-top:14px;font-family:inherit}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(104,211,145,.9);color:#050510;padding:8px 18px;border-radius:20px;font-size:11px;font-weight:700;opacity:0;pointer-events:none;z-index:2000;transition:all .3s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* STARS */
+.stars-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.empty-text{font-size:12px;line-height:1.6}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sh-title{font-size:12px;font-weight:700;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.sh-btns{display:flex;gap:6px}
+
+/* DIMENSIONS */
+.dims-block{padding:8px 12px;border-bottom:1px solid var(--border)}
+.dims-toggle{display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:700;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;cursor:pointer;padding:2px 0;user-select:none}
+.dims-toggle:hover{color:var(--text)}
+.dims-type-badge{display:none;background:rgba(99,179,237,.14);color:var(--cyan);font-size:8px;padding:2px 8px;border-radius:10px;font-weight:700;letter-spacing:.04em;text-transform:none}
+.dims-hint{font-size:9px;color:var(--dim);padding:3px 0 6px;line-height:1.4}
+.dims-form{padding-top:4px;display:none}
+.dims-form.open{display:block}
+.dims-row{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px}
+.dims-row.trio{grid-template-columns:repeat(3,1fr)}
+.dims-row.one{grid-template-columns:1fr}
+.dims-f label{display:block;font-size:8px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.06em;cursor:help}
+.dims-f label.imp{color:rgba(99,179,237,.8)}
+.dims-input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:6px;padding:5px 6px;color:var(--text);font-size:11px;outline:none;font-family:inherit;text-align:center}
+.dims-input:focus{border-color:var(--cyan);background:rgba(99,179,237,.05)}
+.dims-input::placeholder{color:var(--muted);font-size:10px}
+.dims-input.imp{border-color:rgba(99,179,237,.28)}
+select.dims-input{text-align:left;padding-left:6px;cursor:pointer}
+.dims-sub{font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin:8px 0 4px;display:flex;align-items:center;gap:5px}
+
+/* INSTANT PHOTO */
+.instant-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.instant-card{border-radius:var(--r);overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:all .2s}
+.instant-card:hover{border-color:var(--cyan);transform:translateY(-1px)}
+.instant-card canvas,.instant-card img{width:100%;aspect-ratio:1;object-fit:contain;display:block}
+.instant-lbl{font-size:8px;text-align:center;padding:4px 5px;color:var(--dim);font-weight:600;background:var(--card);display:flex;align-items:center;justify-content:space-between}
+.instant-dl{background:none;border:none;color:var(--cyan);cursor:pointer;font-size:13px;padding:0;line-height:1}
+
+/* ANSWER */
+.answer-ta{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;color:var(--text);font-size:12px;outline:none;font-family:inherit;resize:vertical;min-height:70px;margin-bottom:10px;transition:border-color .2s}
+.answer-ta:focus{border-color:var(--cyan)}
+
+/* CALCULADORA */
+.ship-tabs{display:flex;gap:5px;margin-bottom:12px}
+.ship-tab{flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--dim);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;line-height:1.4}
+.ship-tab:hover{border-color:rgba(246,173,85,.4);color:var(--text)}
+.ship-tab.active{border-color:var(--gold);color:var(--gold);background:rgba(246,173,85,.08)}
+.cost-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:11px}
+.cost-table th{padding:6px 8px;text-align:center;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.cost-table th:first-child{text-align:left}
+.cost-table td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.03)}
+.cost-table td:first-child{color:var(--dim);font-size:10px}
+.cost-table td:not(:first-child){text-align:center;font-weight:600}
+.cost-table .row-total td{padding:9px 8px;background:rgba(255,255,255,.04);border-top:1px solid var(--border);font-weight:800;font-size:13px}
+.ct-neg{color:var(--red)!important}
+.ct-pos{background:linear-gradient(135deg,var(--gold),#ed8936);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:800!important}
+.ct-dim{color:var(--muted)!important;font-size:10px!important;font-weight:400!important}
+.ct-green{color:var(--green)!important}
+</style>
+</head>
+<body>
+
+<canvas class="stars-canvas" id="starsCanvas"></canvas>
+<div class="toast" id="toast"></div>
+
+<!-- CONFIG MODAL -->
+<div class="modal-overlay" id="modalCfg">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ Configuración</div>
+      <button class="modal-close" id="btnCloseCfg">✕</button>
+    </div>
+    <div class="form-group">
+      <div class="form-label">🤖 Claude API</div>
+      <div style="background:rgba(0,200,100,.08);border:1px solid rgba(0,200,100,.3);border-radius:6px;padding:8px 12px;font-size:11px;color:#aaa;">🔒 Gestionada por el servidor — no necesitás configurarla aquí.</div>
+      <input type="hidden" id="cfgClaude">
+    </div>
+    <div class="form-group">
+      <div class="form-label">🖼️ Gemini API Key <span style="color:var(--green);font-size:9px">GRATIS · Google AI Studio</span></div>
+      <input class="cfg-input" id="cfgGemini" type="password" placeholder="AIzaSy...">
+      <div class="cfg-hint">Gratis en <a id="lnkGemini">aistudio.google.com/apikey</a> → Get API Key — para generar imágenes IA de alta calidad</div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">🟢 OpenAI API Key <span style="color:var(--green);font-size:9px">DALL-E 3 · mejor calidad de imágenes</span></div>
+      <input class="cfg-input" id="cfgOpenAI" type="password" placeholder="sk-...">
+      <div class="cfg-hint">Obtén tu key en <a id="lnkOpenAI">platform.openai.com/api-keys</a> → DALL-E 3 da las imágenes más realistas y consistentes</div>
+    </div>
+    <div class="form-group">
+      <div class="form-label">🎨 Together AI Key <span style="color:var(--dim);font-size:9px">opcional · FLUX</span></div>
+      <input class="cfg-input" id="cfgTogether" type="password" placeholder="tgp_v1_...">
+      <div class="cfg-hint">Si tenés créditos en <a id="lnkTogether">api.together.ai</a></div>
+    </div>
+    <button class="btn-save" id="btnSaveCfg">💾 Guardar</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appRoot" style="display:none">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="brand-block">
+      <div class="brand-logo-wrap">
+        <div class="brand-logo">🚀</div>
+        <div class="brand-text">
+          <div class="brand-name">SPACE MELI</div>
+          <div class="brand-sub">by Nicolas Diaz</div>
+        </div>
+      </div>
+      <div class="brand-badge">✦ MercadoLibre Chile IA</div>
+    </div>
+
+    <div class="product-block">
+      <label>Producto</label>
+      <textarea class="product-input" id="productInput" placeholder="Ej: Aro de luz LED 20cm con soporte celular sin trípode..." rows="3"></textarea>
+      <button class="btn-ia" id="btnIA">✨ Generar Todo con IA</button>
+    </div>
+
+    <!-- DIMENSIONES SMART -->
+    <div class="dims-block">
+      <div class="dims-toggle" id="dimToggle">
+        <span>📐 Especificaciones</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="dims-type-badge" id="dimTypeBadge"></span>
+          <span id="dimArrow">▸</span>
+        </div>
+      </div>
+      <div class="dims-form" id="dimsForm">
+        <!-- Renderizado dinámico por JS según tipo de producto -->
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">Publicación</div>
+      <div class="nav-item active" data-panel="titles"><span class="nav-icon">🏆</span><span class="nav-label">Títulos SEO</span></div>
+      <div class="nav-item" data-panel="desc"><span class="nav-icon">📝</span><span class="nav-label">Descripción</span></div>
+      <div class="nav-item" data-panel="audit"><span class="nav-icon">🔍</span><span class="nav-label">Auditoría</span></div>
+      <div class="nav-section">Estrategia</div>
+      <div class="nav-item" data-panel="spy"><span class="nav-icon">🕵️</span><span class="nav-label">Spy Comprador</span></div>
+      <div class="nav-item" data-panel="ads"><span class="nav-icon">🎯</span><span class="nav-label">Campañas Ads</span></div>
+      <div class="nav-item" data-panel="price"><span class="nav-icon">💰</span><span class="nav-label">Calculadora</span></div>
+      <div class="nav-section">Contenido Visual</div>
+      <div class="nav-item" data-panel="images"><span class="nav-icon">🎨</span><span class="nav-label">Imágenes IA</span></div>
+      <div class="nav-item" data-panel="brand"><span class="nav-icon">💎</span><span class="nav-label">Brand Advisor</span></div>
+      <div class="nav-section">Atención</div>
+      <div class="nav-item" data-panel="answer"><span class="nav-icon">💬</span><span class="nav-label">Responder</span></div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="btn-notion" href="https://www.notion.so/36a66d4f955a8103ac49d253f1d63ad4" target="_blank">
+        <span style="font-size:14px">📓</span><span>Notion Hub</span>
+      </a>
+      <button class="btn-cfg" id="btnOpenCfg"><span style="font-size:14px">⚙️</span><span>Configuración API Keys</span></button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="main-header">
+      <div class="header-title"><span class="header-icon" id="mainIcon">🏆</span><span id="mainTitle">Títulos SEO para MELI Chile</span></div>
+      <span class="status-pill ready" id="statusPill">Listo</span>
+    </div>
+
+    <div class="content">
+
+      <!-- TÍTULOS -->
+      <div class="panel active" id="panel-titles">
+        <div class="sh">
+          <div class="sh-title"></div>
+          <button class="btn-sm c" id="btnGenTitles">Generar títulos</button>
+        </div>
+        <div id="titlesOut">
+          <div class="empty"><div class="empty-icon">🏆</div><div class="empty-text">Escribe el nombre del producto en el panel izquierdo<br>y genera 8 títulos optimizados para MELI Chile</div></div>
+        </div>
+      </div>
+
+      <!-- DESCRIPCIÓN -->
+      <div class="panel" id="panel-desc">
+        <div class="sh">
+          <div class="sh-title"></div>
+          <div class="sh-btns">
+            <button class="btn-sm c" id="btnGenDesc">Generar</button>
+            <button class="btn-sm" id="btnCopyDesc">Copiar</button>
+          </div>
+        </div>
+        <div class="output-area" id="descOut">La descripción aparecerá aquí con todas las secciones estructuradas...</div>
+        <div class="char-count" id="descChars"></div>
+      </div>
+
+      <!-- AUDITORÍA -->
+      <div class="panel" id="panel-audit">
+        <div class="sh">
+          <div class="sh-title"></div>
+          <button class="btn-sm c" id="btnGenAudit">🔍 Auditar</button>
+        </div>
+
+        <!-- DATOS DE LA PUBLICACIÓN -->
+        <div class="card" style="margin-bottom:10px">
+          <div class="card-title">📋 Datos de la publicación</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <input id="auditUrl" class="input-field" type="text" placeholder="Link de la publicación (opcional)" style="font-size:11px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <input id="auditPrice" class="input-field" type="text" placeholder="Precio actual ($)" style="font-size:11px">
+              <input id="auditCompPrice" class="input-field" type="text" placeholder="Precio competencia ($)" style="font-size:11px">
+            </div>
+            <input id="auditCompetitors" class="input-field" type="text" placeholder="Competidores principales (opcional)" style="font-size:11px">
+            <div style="font-size:10px;color:var(--dim);font-weight:700;margin-top:2px">OBJETIVO</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px" id="auditGoals">
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" value="más ventas" checked> Más ventas</label>
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" value="más visibilidad"> Más visibilidad</label>
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" value="mejorar ACOS"> Mejorar ACOS</label>
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" value="mejorar ROAS"> Mejorar ROAS</label>
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" value="posicionamiento orgánico"> Posicionamiento</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÉTRICAS -->
+        <div class="card" style="margin-bottom:10px">
+          <div class="card-title">📊 Métricas de visitas y conversiones <span style="font-size:9px;color:var(--dim);font-weight:400">(opcional — pegá los datos de MELI)</span></div>
+          <textarea id="auditMetrics" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;padding:8px;resize:vertical;min-height:70px;font-family:inherit;line-height:1.5" placeholder="Ej: Visitas: 1200 | Conversión: 0.8% | Ventas: 9 | Impresiones: 15000 | etc."></textarea>
+        </div>
+
+        <!-- PRODUCT ADS -->
+        <div class="card" style="margin-bottom:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div class="card-title" style="margin:0">🎯 Product Ads <span style="font-size:9px;color:var(--dim);font-weight:400">(opcional)</span></div>
+            <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer">
+              <input type="checkbox" id="auditHasAds"> Tengo campaña activa
+            </label>
+          </div>
+          <div id="auditAdsFields" style="display:none;flex-direction:column;gap:8px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <input id="auditAcos" class="input-field" type="text" placeholder="ACOS actual (%)" style="font-size:11px">
+              <input id="auditInversion" class="input-field" type="text" placeholder="Inversión ($)" style="font-size:11px">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <input id="auditClics" class="input-field" type="text" placeholder="Clics" style="font-size:11px">
+              <input id="auditVentasAds" class="input-field" type="text" placeholder="Ventas por ads" style="font-size:11px">
+            </div>
+            <textarea id="auditAdsExtra" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;padding:8px;resize:vertical;min-height:50px;font-family:inherit" placeholder="Otros datos: impresiones, CTR, ventas asistidas, presupuesto diario..."></textarea>
+          </div>
+        </div>
+
+        <button class="btn-gen" id="btnGenAudit2">🔍 Analizar publicación completa</button>
+        <div id="auditOut" style="margin-top:12px">
+          <div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Completá los datos arriba<br>y recibí un análisis brutal y honesto</div></div>
+        </div>
+      </div>
+
+      <!-- SPY -->
+      <div class="panel" id="panel-spy">
+        <div class="sh">
+          <div class="sh-title"></div>
+          <button class="btn-sm c" id="btnGenSpy">Analizar</button>
+        </div>
+        <div id="spyOut">
+          <div class="empty"><div class="empty-icon">🕵️</div><div class="empty-text">Descubre qué piensa el comprador chileno<br>y qué palabras clave no estás usando</div></div>
+        </div>
+      </div>
+
+      <!-- IMÁGENES -->
+      <div class="panel" id="panel-images">
+
+        <!-- Subir fotos — MULTI-FOTO -->
+        <div class="card">
+          <div class="card-title" style="justify-content:space-between">
+            <span>📸 Fotos del producto</span>
+            <span id="photoCount" style="font-size:9px;color:var(--dim);font-weight:600"></span>
+          </div>
+          <!-- Zona de drop inicial (visible cuando no hay fotos) -->
+          <div class="img-upload" id="uploadArea">
+            <input type="file" accept="image/*" id="imgFile" multiple>
+            <div style="font-size:28px;margin-bottom:6px">📸</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Sube tus fotos del producto</div>
+            <div style="font-size:10px;color:var(--dim)">Puedes subir hasta 5 fotos — mejor perspectiva para la IA</div>
+          </div>
+          <!-- Grid de fotos (visible cuando hay fotos) -->
+          <div id="photoGrid" class="photo-grid" style="display:none"></div>
+          <!-- Detalles visuales para la IA -->
+          <div style="margin-bottom:10px">
+            <div style="font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Detalles visuales para la IA <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></div>
+            <textarea id="imgNotes" rows="3" placeholder="Ej: color negro mate con patas doradas, tapizado cuero beige, altura regulable con palanca, con descansabrazos acolchados, ruedas dobles..." style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;padding:8px 10px;resize:vertical;font-family:inherit;line-height:1.5;box-sizing:border-box;outline:none" oninput="productImageNotes=this.value"></textarea>
+            <div style="font-size:9px;color:var(--dim);margin-top:3px">Color exacto, materiales, acabados, detalles que la IA debe respetar en todas las imágenes</div>
+          </div>
+          <!-- Controles de variaciones -->
+          <div id="previewWrap" style="display:none">
+            <div style="font-size:10px;color:var(--dim);margin-bottom:8px;padding:6px 8px;background:rgba(99,179,237,.06);border-radius:8px;border:1px solid rgba(99,179,237,.12)">
+              💡 La foto marcada <b style="color:var(--cyan)">REF</b> es la referencia para la IA. Toca cualquier foto para cambiarla.
+            </div>
+            <button class="btn-gen" id="btnGenInstant" style="margin-bottom:10px">✂️ Remover fondo + 6 variaciones (foto REF)</button>
+            <div class="instant-grid" id="instantGrid"></div>
+          </div>
+        </div>
+
+        <!-- Generar con IA -->
+        <div class="card">
+          <div class="card-title">🤖 Generar con IA</div>
+          <div id="noKeyBanner" style="display:none"></div>
+          <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+            <button class="btn-sm c" id="btnSelAll">✓ Todas</button>
+            <button class="btn-sm" id="btnSelNone">✕ Ninguna</button>
+            <button class="btn-sm p" id="btnSelEss">⭐ Esenciales</button>
+          </div>
+          <div class="shot-grid" id="shotGrid"></div>
+        </div>
+
+        <button class="btn-gen" id="btnGenImgs">🚀 Generar imágenes con IA</button>
+
+        <div class="img-progress" id="imgProg">
+          <div style="font-size:11px;color:var(--dim)" id="imgProgText">Generando...</div>
+          <div class="prog-bar-wrap"><div class="prog-bar" id="progBar" style="width:0%"></div></div>
+        </div>
+        <div class="imgs-grid" id="imgsOut"></div>
+      </div>
+
+      <!-- BRAND -->
+      <div class="panel" id="panel-brand">
+        <div class="form-group">
+          <div class="form-label">Nombre de tu tienda / marca</div>
+          <input class="form-input" id="brandName" placeholder="Ej: Tienda El Garage">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Categoría principal</div>
+          <input class="form-input" id="brandCat" placeholder="Ej: Muebles y Hogar">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Productos que vendes</div>
+          <textarea class="form-textarea" id="brandProducts" placeholder="Ej: Sillas, mesas, sofás de diseño escandinavo..."></textarea>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Público objetivo</div>
+          <input class="form-input" id="brandAudience" placeholder="Ej: Familias chilenas clase media-alta">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Personalidad deseada</div>
+          <input class="form-input" id="brandVibe" placeholder="Ej: Premium, moderno, confiable">
+        </div>
+        <button class="btn-gen" id="btnGenBrand">💎 Crear Manual de Marca</button>
+        <div style="margin-top:12px;display:none" id="brandOutWrap">
+          <div class="output-area brand" id="brandOut"></div>
+          <div style="margin-top:8px"><button class="btn-sm c" id="btnCopyBrand">Copiar manual</button></div>
+        </div>
+      </div>
+
+      <!-- PRECIO -->
+      <div class="panel" id="panel-price">
+        <div class="price-grid">
+          <div class="form-group">
+            <div class="form-label">💰 Costo del producto ($CLP)</div>
+            <input class="form-input" id="priceCost" type="number" placeholder="Ej: 5000">
+          </div>
+          <div class="form-group">
+            <div class="form-label">🏷️ Precio de venta ($CLP)</div>
+            <input class="form-input" id="priceSell" type="number" placeholder="Ej: 14990">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label" style="margin-bottom:6px">🚚 Modalidad de envío</div>
+          <div class="ship-tabs">
+            <div class="ship-tab active" data-ship="full">📦 FULL<br><span style="font-size:8px;font-weight:400;opacity:.8">Bodega MELI</span></div>
+            <div class="ship-tab" data-ship="propio">🚚 Propio<br><span style="font-size:8px;font-weight:400;opacity:.8">Lo envías tú</span></div>
+            <div class="ship-tab" data-ship="comprador">👤 Comprador<br><span style="font-size:8px;font-weight:400;opacity:.8">Lo paga él</span></div>
+          </div>
+        </div>
+        <div id="shipFullSection">
+          <div class="form-group">
+            <div class="form-label">⚖️ Peso del producto (gramos)</div>
+            <input class="form-input" id="priceWeight" type="number" placeholder="Ej: 450">
+            <div style="font-size:9px;color:var(--muted);margin-top:3px" id="fullFeeHint">Ingresá el peso → calcula tarifa FULL automáticamente</div>
+          </div>
+        </div>
+        <div id="shipPropioSection" style="display:none">
+          <div class="form-group">
+            <div class="form-label">🚚 Costo envío que pagás ($CLP)</div>
+            <input class="form-input" id="priceShipCost" type="number" placeholder="Ej: 3500">
+          </div>
+        </div>
+        <div class="price-grid">
+          <div class="form-group">
+            <div class="form-label">📦 Embalaje/Packaging ($CLP)</div>
+            <input class="form-input" id="pricePack" type="number" placeholder="Ej: 200">
+          </div>
+          <div class="form-group">
+            <div class="form-label">🔧 Otros costos ($CLP)</div>
+            <input class="form-input" id="priceOther" type="number" placeholder="Ej: 0">
+          </div>
+        </div>
+        <div id="priceBreakdown" style="display:none"></div>
+        <button class="btn-gen" id="btnCalcPrice">🧮 Calcular todos los costos + IA</button>
+        <div class="output-area price" id="priceOut" style="margin-top:12px;display:none"></div>
+      </div>
+
+      <!-- RESPONDER -->
+      <div class="panel" id="panel-answer">
+        <div class="card">
+          <div class="card-title">❓ Pregunta del comprador</div>
+          <textarea class="answer-ta" id="answerQ" placeholder="Escribe aquí la pregunta...&#10;Ej: ¿El producto viene con garantía? ¿Demora mucho en llegar a Concepción?"></textarea>
+          <button class="btn-gen" id="btnGenAnswer">💬 Generar respuesta perfecta</button>
+        </div>
+        <div style="margin-top:12px;display:none" id="answerOutWrap">
+          <div class="output-area answer" id="answerOut"></div>
+          <div style="margin-top:8px"><button class="btn-sm c" id="btnCopyAnswer">Copiar respuesta</button></div>
+        </div>
+      </div>
+
+      <!-- CAMPAÑAS ADS -->
+      <div class="panel" id="panel-ads">
+        <div class="sh">
+          <div class="sh-title"></div>
+          <button class="btn-sm c" id="btnGenAds">🎯 Analizar</button>
+        </div>
+
+        <!-- UPLOAD CAPTURA -->
+        <div class="card" style="margin-bottom:10px">
+          <div class="card-title">📸 Captura del tablero <span style="font-size:9px;color:var(--dim);font-weight:400">(opcional — sube screenshot del admin de campañas)</span></div>
+          <div class="img-upload" id="adsUploadArea">
+            <input type="file" accept="image/*" id="adsImgFile">
+            <div style="font-size:26px;margin-bottom:4px">📊</div>
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px">Sube el screenshot de tu campaña</div>
+            <div style="font-size:10px;color:var(--dim)">PNG, JPG — tablero de Mercado Ads</div>
+          </div>
+          <div id="adsPreviewWrap" style="display:none;align-items:center;gap:10px;padding:8px;background:rgba(104,211,145,.08);border:1px solid rgba(104,211,145,.2);border-radius:10px">
+            <img id="adsPreviewThumb" style="width:80px;height:50px;object-fit:cover;border-radius:6px;border:2px solid var(--green);background:#111">
+            <div style="flex:1">
+              <div style="font-size:11px;font-weight:700;color:var(--green)">✅ Captura cargada</div>
+              <div style="font-size:10px;color:var(--dim);margin-top:2px">Claude leerá la imagen + los datos del formulario</div>
+            </div>
+            <button class="btn-sm" id="btnClearAdsImg">✕</button>
+          </div>
+        </div>
+
+        <!-- MÉTRICAS CAMPAÑA -->
+        <div class="card" style="margin-bottom:10px">
+          <div class="card-title">📊 Datos de la campaña <span style="font-size:9px;color:var(--dim);font-weight:400">(completá lo que tengas)</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <input id="adsCampName" class="input-field" type="text" placeholder="Nombre de campaña" style="font-size:11px">
+              <input id="adsPeriod" class="input-field" type="text" placeholder="Período (ej: May 2025)" style="font-size:11px">
+            </div>
+            <div style="font-size:10px;color:var(--dim);font-weight:700;margin-top:2px">MÉTRICAS PRINCIPALES</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <input id="adsImpresiones" class="input-field" type="text" placeholder="Impresiones" style="font-size:11px">
+              <input id="adsClics" class="input-field" type="text" placeholder="Clics" style="font-size:11px">
+              <input id="adsCtr" class="input-field" type="text" placeholder="CTR (%)" style="font-size:11px">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <input id="adsVentas" class="input-field" type="text" placeholder="Ventas" style="font-size:11px">
+              <input id="adsVentasAsis" class="input-field" type="text" placeholder="Ventas asistidas" style="font-size:11px">
+              <input id="adsIngresos" class="input-field" type="text" placeholder="Ingresos ($)" style="font-size:11px">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <input id="adsInversion" class="input-field" type="text" placeholder="Inversión ($)" style="font-size:11px">
+              <input id="adsAcos" class="input-field" type="text" placeholder="ACOS (%)" style="font-size:11px">
+              <input id="adsCpc" class="input-field" type="text" placeholder="CPC promedio ($)" style="font-size:11px">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <input id="adsPresupuesto" class="input-field" type="text" placeholder="Presupuesto diario ($)" style="font-size:11px">
+              <input id="adsConv" class="input-field" type="text" placeholder="Conversión (%)" style="font-size:11px">
+            </div>
+          </div>
+        </div>
+
+        <!-- OBJETIVO Y CONTEXTO -->
+        <div class="card" style="margin-bottom:10px">
+          <div class="card-title">🎯 Objetivo y contexto</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;flex-wrap:wrap;gap:6px" id="adsGoals">
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" value="bajar ACOS" checked> Bajar ACOS</label>
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" value="aumentar ventas"> Aumentar ventas</label>
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" value="mejorar CTR"> Mejorar CTR</label>
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" value="escalar campaña"> Escalar</label>
+              <label style="font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" value="mejorar conversión"> Mejorar conversión</label>
+            </div>
+            <textarea id="adsContext" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:11px;padding:8px;resize:vertical;min-height:60px;font-family:inherit;line-height:1.5" placeholder="Contexto adicional: productos en campaña, categoría, precio, competencia, historial, etc."></textarea>
+          </div>
+        </div>
+
+        <button class="btn-gen" id="btnGenAds2">🎯 Analizar campaña completa</button>
+        <div id="adsOut" style="margin-top:12px">
+          <div class="empty"><div class="empty-icon">🎯</div><div class="empty-text">Completá las métricas arriba<br>y recibí un análisis profesional de tu campaña</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── KEYS ──────────────────────────────────────────────────────────────────────
+// ── KNOWLEDGE BASE — carga los archivos de documentación oficial MELI ────────
+let KB = {};   // { 'product-ads': '...', 'titulos-seo': '...', ... }
+(async () => {
+  try {
+    const r = await fetch('/api/knowledge');
+    if (r.ok) KB = await r.json();
+  } catch(e) { /* servidor no disponible, continuar sin knowledge */ }
+})();
+
+// Obtiene el texto de uno o varios archivos de knowledge para inyectar en prompts
+function kb(...keys) {
+  return keys.map(k => KB[k] ? `\n\n--- DOCUMENTACIÓN OFICIAL MERCADOLIBRE: ${k.toUpperCase().replace(/-/g,' ')} ---\n${KB[k]}` : '').join('');
+}
+
+const KEYS = {
+  // claude: clave gestionada por servidor — nunca expuesta al browser
+  openai:   localStorage.getItem('sm_openai')   || '',   // DALL-E 3 — mejor calidad
+  gemini:   localStorage.getItem('sm_gemini')   || '',   // gratis en aistudio.google.com/apikey
+  together: localStorage.getItem('sm_together') || '',
+  hf:       localStorage.getItem('sm_hf')       || ''
+};
+
+// ── DIMENSIONES ───────────────────────────────────────────────────────────────
+document.getElementById('dimToggle').addEventListener('click', () => {
+  const form = document.getElementById('dimsForm');
+  const arrow = document.getElementById('dimArrow');
+  const open = form.classList.toggle('open');
+  arrow.textContent = open ? '▾' : '▸';
+});
+// ── SMART DIMS — Campos dinámicos según tipo de producto ─────────────────────
+
+const DIMS_SCHEMAS = {
+  silla: {
+    label:'Silla', icon:'🪑',
+    fields:[
+      {id:'dAltoTotal',     label:'Alto total (cm)',           hint:'Del suelo al tope del respaldo'},
+      {id:'dAltoSueloMin',  label:'Asiento mín (cm)',          hint:'Suelo → asiento en posición más baja'},
+      {id:'dAltoSueloMax',  label:'Asiento máx (cm)',          hint:'Suelo → asiento en posición más alta'},
+      {id:'dAnchoAsiento',  label:'Ancho asiento (cm)',        hint:''},
+      {id:'dProfAsiento',   label:'Profundidad (cm)',          hint:'Fondo → frente del asiento'},
+      {id:'dAnchoTotal',    label:'Ancho c/apoyabrazos (cm)',  hint:''},
+      {id:'dCargaMax',      label:'Carga máxima (kg)',         hint:'Peso máximo soportado', imp:true},
+      {id:'dPeso',          label:'Peso producto (kg)',        hint:''},
+    ]
+  },
+  mesa: {
+    label:'Mesa', icon:'🪵',
+    fields:[
+      {id:'dAlto',     label:'Alto (cm)',          hint:''},
+      {id:'dLargo',    label:'Largo (cm)',          hint:''},
+      {id:'dAncho',    label:'Ancho (cm)',          hint:''},
+      {id:'dCargaMax', label:'Carga máxima (kg)',   hint:'Peso máximo sobre la mesa', imp:true},
+      {id:'dPeso',     label:'Peso producto (kg)',  hint:''},
+    ]
+  },
+  escritorio: {
+    label:'Escritorio', icon:'🖥',
+    fields:[
+      {id:'dAlto',     label:'Alto (cm)',           hint:''},
+      {id:'dLargo',    label:'Largo (cm)',           hint:''},
+      {id:'dAncho',    label:'Profundidad (cm)',     hint:'Frente → pared'},
+      {id:'dCargaMax', label:'Carga máxima (kg)',    hint:'Peso soportado sobre la superficie', imp:true},
+      {id:'dPeso',     label:'Peso producto (kg)',   hint:''},
+    ]
+  },
+  sofa: {
+    label:'Sofá / Sillón', icon:'🛋',
+    fields:[
+      {id:'dLargo',        label:'Largo total (cm)',   hint:''},
+      {id:'dAncho',        label:'Profundidad (cm)',   hint:'Frente → respaldo'},
+      {id:'dAlto',         label:'Alto total (cm)',    hint:''},
+      {id:'dAltoAsiento',  label:'Alto asiento (cm)',  hint:'Del suelo al asiento'},
+      {id:'dCargaMax',     label:'Carga máxima (kg)',  hint:'Peso máximo soportado', imp:true},
+      {id:'dPeso',         label:'Peso producto (kg)', hint:''},
+    ]
+  },
+  estante: {
+    label:'Estante / Repisa', icon:'📚',
+    fields:[
+      {id:'dAlto',            label:'Alto total (cm)',       hint:''},
+      {id:'dAncho',           label:'Ancho (cm)',             hint:''},
+      {id:'dProf',            label:'Profundidad (cm)',       hint:''},
+      {id:'dNEstantes',       label:'Nro. estantes',          hint:'Cantidad de repisas'},
+      {id:'dCargaEstante',    label:'Carga x estante (kg)',   hint:'Peso máximo por repisa', imp:true},
+      {id:'dCargaMax',        label:'Carga total (kg)',        hint:'Capacidad total del mueble', imp:true},
+      {id:'dPeso',            label:'Peso producto (kg)',      hint:''},
+    ]
+  },
+  cama: {
+    label:'Cama / Sommier', icon:'🛏',
+    fields:[
+      {id:'dMedida',   label:'Medida',              hint:'', type:'select', options:['1 Plaza (80×190cm)','1.5 Plazas (105×190cm)','2 Plazas (135×190cm)','Queen (160×200cm)','King (200×200cm)']},
+      {id:'dLargo',    label:'Largo real (cm)',      hint:''},
+      {id:'dAncho',    label:'Ancho real (cm)',      hint:''},
+      {id:'dAlto',     label:'Alto total (cm)',      hint:'Del suelo a la superficie'},
+      {id:'dCargaMax', label:'Carga máxima (kg)',    hint:'Peso máximo soportado', imp:true},
+      {id:'dPeso',     label:'Peso producto (kg)',   hint:''},
+    ]
+  },
+  generic: {
+    label:null, icon:'📐',
+    fields:[
+      {id:'dAlto',     label:'Alto (cm)',          hint:''},
+      {id:'dAncho',    label:'Ancho (cm)',          hint:''},
+      {id:'dLargo',    label:'Largo (cm)',          hint:''},
+      {id:'dDiam',     label:'Diámetro (cm)',       hint:'Si aplica'},
+      {id:'dCargaMax', label:'Carga máxima (kg)',   hint:'Peso máximo soportado si aplica', imp:true},
+      {id:'dPeso',     label:'Peso producto (kg)',  hint:''},
+    ]
+  }
+};
+
+const PKG_FIELDS = [
+  {id:'dBLargo', label:'Largo (cm)',      hint:''},
+  {id:'dBAncho', label:'Ancho (cm)',      hint:''},
+  {id:'dBAlto',  label:'Alto (cm)',       hint:''},
+  {id:'dBPeso',  label:'Peso bruto (kg)', hint:''},
+];
+
+let _dimsType = 'generic';
+
+function detectProductType(name) {
+  const n = name.toLowerCase();
+  if (/\bsilla\b|sill[oó]n.*ofic|sill[oó]n.*escrit|sill[oó]n.*gam|silla.*gas|silla.*ergon|silla.*girat|silla.*escritorio/.test(n)) return 'silla';
+  if (/\bsof[aá]\b|sill[oó]n(?!.*escrit)(?!.*ofic)|puf\b|bean bag|loveseat/.test(n)) return 'sofa';
+  if (/escritorio|desk\b/.test(n)) return 'escritorio';
+  if (/\bmesa\b|mesita|mesón|mesa.*comedor|mesa.*ratona|mesa.*jardin/.test(n)) return 'mesa';
+  if (/estante|repisa|librero|biblioteca|rack.*libro|organizador.*libro/.test(n)) return 'estante';
+  if (/\bcama\b|sommier|camarote|litera|cama.*plaza/.test(n)) return 'cama';
+  return 'generic';
+}
+
+function _dimsFieldHtml(f) {
+  if (f.type === 'select') {
+    return `<label class="${f.imp?'imp':''}" title="${f.hint}">${f.label}</label>
+      <select class="dims-input${f.imp?' imp':''}" id="${f.id}">
+        <option value="">— Seleccionar —</option>
+        ${(f.options||[]).map(o=>`<option value="${o}">${o}</option>`).join('')}
+      </select>`;
+  }
+  return `<label class="${f.imp?'imp':''}" title="${f.hint||''}">${f.label}</label>
+    <input class="dims-input${f.imp?' imp':''}" id="${f.id}" type="number" placeholder="—" min="0" step="0.1">`;
+}
+
+function renderDimsFields(type) {
+  _dimsType = type;
+  const schema = DIMS_SCHEMAS[type] || DIMS_SCHEMAS.generic;
+  const form = document.getElementById('dimsForm');
+  const badge = document.getElementById('dimTypeBadge');
+  if (badge) {
+    if (schema.label) { badge.textContent = `${schema.icon} ${schema.label}`; badge.style.display='inline-flex'; }
+    else badge.style.display = 'none';
+  }
+  const fields = schema.fields;
+  let html = `<div class="dims-hint">Completa los datos — la descripción los incluirá sin placeholders</div>`;
+  let i = 0;
+  while (i < fields.length) {
+    const f = fields[i];
+    if (f.type === 'select') {
+      html += `<div class="dims-row one"><div class="dims-f">${_dimsFieldHtml(f)}</div></div>`;
+      i++;
+    } else if (i+2 < fields.length && fields[i+1]?.type !== 'select' && fields[i+2]?.type !== 'select') {
+      html += `<div class="dims-row trio"><div class="dims-f">${_dimsFieldHtml(fields[i])}</div><div class="dims-f">${_dimsFieldHtml(fields[i+1])}</div><div class="dims-f">${_dimsFieldHtml(fields[i+2])}</div></div>`;
+      i += 3;
+    } else if (i+1 < fields.length && fields[i+1]?.type !== 'select') {
+      html += `<div class="dims-row"><div class="dims-f">${_dimsFieldHtml(fields[i])}</div><div class="dims-f">${_dimsFieldHtml(fields[i+1])}</div></div>`;
+      i += 2;
+    } else {
+      html += `<div class="dims-row one"><div class="dims-f">${_dimsFieldHtml(f)}</div></div>`;
+      i++;
+    }
+  }
+  // Embalaje
+  html += `<div class="dims-sub">📦 Embalaje / Bulto</div>
+    <div class="dims-row trio">
+      <div class="dims-f">${_dimsFieldHtml(PKG_FIELDS[0])}</div>
+      <div class="dims-f">${_dimsFieldHtml(PKG_FIELDS[1])}</div>
+      <div class="dims-f">${_dimsFieldHtml(PKG_FIELDS[2])}</div>
+    </div>
+    <div class="dims-row one"><div class="dims-f">${_dimsFieldHtml(PKG_FIELDS[3])}</div></div>`;
+  form.innerHTML = html;
+}
+
+function getDimsText() {
+  const schema = DIMS_SCHEMAS[_dimsType] || DIMS_SCHEMAS.generic;
+  const allFields = [...schema.fields, ...PKG_FIELDS];
+  const lines = [];
+  allFields.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (!el) return;
+    const v = el.value.trim();
+    if (!v || v === '0') return;
+    lines.push(`${f.label.replace(/\s*\(.*\)/,'')}: ${v}`);
+  });
+  return lines.length
+    ? `\n\nDATOS REALES (usar OBLIGATORIAMENTE en la descripción, sin placeholders ni [completar]):\n${lines.join(' | ')}`
+    : '';
+}
+
+// Auto-detectar tipo al escribir
+let _dimsTimer = null;
+document.getElementById('productInput').addEventListener('input', () => {
+  clearTimeout(_dimsTimer);
+  _dimsTimer = setTimeout(() => {
+    const n = document.getElementById('productInput').value.trim();
+    const t = n ? detectProductType(n) : 'generic';
+    if (t !== _dimsType) {
+      renderDimsFields(t);
+      if (t !== 'generic') {
+        // Auto-abrir el panel al detectar producto con tipo específico
+        const form = document.getElementById('dimsForm');
+        const arrow = document.getElementById('dimArrow');
+        if (!form.classList.contains('open')) { form.classList.add('open'); arrow.textContent='▾'; }
+      }
+    }
+  }, 500);
+});
+
+// Render inicial
+renderDimsFields('generic');
+
+// ── STARS ─────────────────────────────────────────────────────────────────────
+(function(){
+  const c = document.getElementById('starsCanvas');
+  const ctx = c.getContext('2d');
+  let stars = [];
+  function resize(){ c.width=window.innerWidth; c.height=window.innerHeight; }
+  function init(){
+    stars = Array.from({length:120}, () => ({
+      x: Math.random()*c.width, y: Math.random()*c.height,
+      r: Math.random()*1.5+.3, o: Math.random()*.5+.1,
+      s: Math.random()*2+1, t: Math.random()*Math.PI*2
+    }));
+  }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s => {
+      s.t += .01/s.s;
+      const op = s.o + Math.sin(s.t)*.2;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${op})`; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', ()=>{ resize(); init(); });
+  resize(); init(); draw();
+})();
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let productImages = [];    // array of {data: base64string, name: string}
+let productImageNotes = ''; // detalles visuales del producto para enriquecer prompts de imagen
+let adsImageB64 = null;   // captura de tablero de campañas
+
+function getPrimaryImage() { return productImages.length > 0 ? productImages[0].data : null; }
+
+function renderPhotoGrid() {
+  const grid = document.getElementById('photoGrid');
+  const countEl = document.getElementById('photoCount');
+  grid.innerHTML = '';
+  const n = productImages.length;
+
+  productImages.forEach((img, idx) => {
+    const item = document.createElement('div');
+    item.className = 'photo-item' + (idx === 0 ? ' primary' : '');
+    item.innerHTML = `<img src="${img.data}" alt="Foto ${idx+1}">${idx===0?'<div class="photo-badge">REF</div>':''}<button class="photo-del" data-idx="${idx}">✕</button>`;
+    item.addEventListener('click', e => {
+      if (e.target.classList.contains('photo-del') || e.target.closest('.photo-del')) return;
+      if (idx === 0) return;
+      productImages.unshift(productImages.splice(idx, 1)[0]);
+      document.getElementById('instantGrid').innerHTML = '';
+      renderPhotoGrid();
+    });
+    grid.appendChild(item);
+  });
+
+  // Botón "+" si hay menos de 5 fotos
+  if (n < 5) {
+    const addDiv = document.createElement('div');
+    addDiv.className = 'photo-add';
+    addDiv.innerHTML = `<input type="file" accept="image/*" multiple><div style="font-size:20px;line-height:1">+</div><div style="font-size:9px">Agregar</div>`;
+    addDiv.querySelector('input').addEventListener('change', handlePhotoFiles);
+    grid.appendChild(addDiv);
+  }
+
+  const hasPhotos = n > 0;
+  document.getElementById('uploadArea').style.display = hasPhotos ? 'none' : 'block';
+  grid.style.display = hasPhotos ? 'grid' : 'none';
+  document.getElementById('previewWrap').style.display = hasPhotos ? 'block' : 'none';
+  if (countEl) countEl.textContent = hasPhotos ? `${n}/5 foto${n>1?'s':''}` : '';
+}
+
+function handlePhotoFiles(e) {
+  const files = Array.from(e.target.files);
+  const slots = 5 - productImages.length;
+  if (slots <= 0) { toast('⚠️ Máximo 5 fotos'); return; }
+  const toLoad = files.slice(0, slots);
+  let done = 0;
+  toLoad.forEach(f => {
+    const r = new FileReader();
+    r.onload = ev => {
+      productImages.push({ data: ev.target.result, name: f.name });
+      done++;
+      if (done === toLoad.length) renderPhotoGrid();
+    };
+    r.readAsDataURL(f);
+  });
+  e.target.value = '';
+}
+const SHOTS = [
+  {id:'hero_white', cat:'OBLIGATORIA', name:'01 · Hero Sin Fondo',
+   prompt: (n,d) => `Fotografía profesional de producto e-commerce: ${n}.${d?` Características: ${d.slice(0,120)}.`:''}
+Fondo blanco puro absoluto (#FFFFFF), sin texturas, sin sombras en el fondo.
+Producto perfectamente centrado, ocupando el 85% del encuadre cuadrado.
+Iluminación de estudio de 3 puntos: softbox principal lateral izquierdo, reflector derecho, contraluz suave.
+Sombra drop natural muy sutil únicamente debajo del producto.
+Fotografía ultra nítida, detalle máximo, calidad 8K fotorrealista.
+SIN texto, SIN logos, SIN props, SIN elementos decorativos. Formato cuadrado 1:1.`},
+
+  {id:'hero_scene', cat:'PORTADA', name:'02 · Hero con Escenario',
+   prompt: (n,d) => `Fotografía comercial premium de ${n}.${d?` ${d.slice(0,100)}.`:''}
+El producto está sobre una superficie de mármol blanco veteado o madera natural clara.
+Luz natural difusa entrando desde ventana lateral izquierda, ambiente luminoso y limpio.
+1 o 2 props minimalistas que complementan: planta suculenta en maceta blanca mate, o taza cerámica beige.
+Fondo desenfocado en tonos neutros (blanco, crema, gris perla). Profundidad de campo f/2.0, bokeh cremoso.
+Estética nórdica-minimalista, colores naturales, ambiente pulcro y aspiracional.
+SIN texto. Formato cuadrado 1:1.`},
+
+  {id:'specs', cat:'INFORMATIVA', name:'03 · Características',
+   overlay: 'specs',
+   prompt: (n,d) => `Fotografía de producto e-commerce: ${n}.${d?` ${d.slice(0,80)}.`:''}
+Si se proporcionó una imagen de referencia, el producto generado DEBE ser EXACTAMENTE igual: mismo diseño, mismo color, mismos detalles visuales — no inventar variantes.
+Fondo completamente blanco puro (#FFFFFF), sin texturas ni sombras en el fondo.
+COMPOSICION CRITICA: el producto está CENTRADO horizontalmente y ocupa la zona SUPERIOR del encuadre cuadrado (el 60% superior). La zona INFERIOR (40% del alto) está completamente vacía — solo fondo blanco puro sin ningún elemento.
+El producto completo debe caber dentro del encuadre — sin cortar ninguna parte arriba, abajo ni a los lados.
+Iluminación de estudio suave y muy luminosa, uniforme. El producto perfectamente nítido, ángulo 3/4 frontal.
+SIN texto, SIN flechas, SIN labels, SIN props de ningún tipo. Solo el producto sobre fondo blanco. Formato cuadrado 1:1.`},
+
+  {id:'lifestyle', cat:'LIFESTYLE', name:'04 · Persona Real Usando',
+   prompt: (n,d) => `Fotografía lifestyle auténtica de ${n} siendo usado por una persona chilena real.${d?` Uso: ${d.slice(0,80)}.`:''}
+Persona: mujer o hombre chileno de 28-38 años, casual, expresión genuina y natural — NO posada.
+AMBIENTE INTELIGENTE según el tipo de producto — elige el escenario exactamente apropiado:
+- Silla de oficina / escritorio / monitor → oficina moderna luminosa con escritorio limpio, pantalla de computador, luz natural desde ventana
+- Silla o mesa de comedor / vajilla → comedor familiar luminoso, mesa puesta, ventana grande con luz natural
+- Sofá / living / mesa ratona → living moderno con piso madera, alfombra, plantas, luz cálida de tarde
+- Mueble de dormitorio / ropa de cama → dormitorio ordenado y luminoso, luz natural matinal
+- Mueble de terraza / jardín → terraza o jardín exterior real, luz de sol natural, plantas y verde alrededor
+- Accesorio de cocina → cocina moderna luminosa, encimera limpia, luz natural
+- Herramienta / taller → taller o espacio de trabajo organizado con buena iluminación
+- Artículo deportivo → espacio de entrenamiento, gimnasio o exterior iluminado
+Luz natural abundante, ambiente completamente apropiado y coherente con el producto. Muy luminoso y real.
+El producto está en uso activo y es el protagonista visual absoluto.
+Fotografía estilo editorial comercial, Canon R5 50mm f/2.0. SIN texto. Formato cuadrado 1:1.`},
+
+  {id:'specs_lifestyle', cat:'INFORMATIVA', name:'04b · Lifestyle + Características',
+   overlay: 'lifestyle-specs',
+   prompt: (n,d) => `Fotografía lifestyle minimalista y auténtica de ${n} con persona chilena real.${d?` ${d.slice(0,80)}.`:''}
+Si se proporcionó imagen de referencia, el producto DEBE ser EXACTAMENTE igual: mismo diseño, mismo color, mismos detalles — no inventar variantes.
+Persona: chileno/a de 28-38 años, expresión genuina, completamente natural — NO posada ni de stock.
+AMBIENTE según el tipo de producto:
+- Silla oficina/escritorio → oficina moderna luminosa, escritorio limpio, computador, ventana con luz natural
+- Silla/mesa de comedor → comedor familiar, mesa puesta, ventana grande, luz diurna
+- Sofá/living/sillón → living moderno, piso madera, alfombra, plantas, luz cálida
+- Mueble dormitorio → dormitorio ordenado, luz matinal, ropa de cama clara
+- Mueble exterior/terraza → terraza o jardín real, sol natural, vegetación verde
+- Cocina → cocina luminosa, encimera clara, ingredientes naturales
+- Herramienta → taller organizado e iluminado
+- Deportes → exterior luminoso o gimnasio
+COMPOSICION CRITICA: la persona usando el producto ocupa el área superior (68% del alto del cuadrado). El producto COMPLETO debe estar visible — sin cortar la cabeza de la persona ni partes del producto. La franja INFERIOR del cuadrado (32% del alto) tiene fondo muy claro o blanco, sin elementos que distraigan.
+Iluminación natural abundante. Ambiente minimalista, pulcro, muy luminoso, colores neutros y claros.
+Estética editorial premium, real. SIN texto. Formato cuadrado 1:1.`},
+
+  {id:'detail', cat:'DETALLE', name:'05 · Detalle Macro',
+   prompt: (n,d) => `Fotografía macro extrema de ${n} mostrando calidad premium.${d?` Material/detalle: ${d.slice(0,80)}.`:''}
+Primer plano ultra cercano del detalle más interesante: textura del material, costura, mecanismo, acabado superficial.
+Profundidad de campo ultra superficial f/1.4 — un plano nítido perfecto, bokeh suave cremoso adelante y atrás.
+Iluminación ring light que revela cada detalle fino de la textura.
+Los colores son fieles y reales, la calidad del material es evidente y premium.
+Transmite durabilidad, craftsmanship y valor. Formato cuadrado 1:1.`},
+
+  {id:'angle', cat:'DETALLE', name:'06 · Ángulo 45°',
+   prompt: (n,d) => `Vista dinámica en ángulo 45° de ${n}.${d?` ${d.slice(0,80)}.`:''}
+El producto está sobre superficie de madera natural clara o porcelanato blanco/gris claro.
+ILUMINACIÓN BRILLANTE Y LIMPIA: estudio fotográfico con mucha luz, fondo blanco o gris muy claro — amplio y luminoso.
+Luz principal suave desde arriba-lateral izquierda, relleno derecho que elimina sombras duras, sin oscuridades profundas.
+La iluminación debe ser abundante y envolvente — ambiente claro, profesional, sin dramatismo oscuro.
+El ángulo 45° muestra la tridimensionalidad y las formas del producto.
+Fotografía de catálogo de alta gama, colores fieles y vibrantes, muy nítido.
+SIN texto, SIN props. Formato cuadrado 1:1.`},
+
+  {id:'flatlay', cat:'EDITORIAL', name:'07 · Flat Lay Instagram',
+   prompt: (n,d) => `Fotografía cenital (flat lay) editorial minimalista de ${n}.${d?` ${d.slice(0,80)}.`:''}
+Superficie: tabla de madera blanca lavada o mármol blanco mate.
+Props cuidadosamente seleccionados (máximo 3): planta suculenta pequeña en maceta blanca, taza cerámica beige, trozo de tela de lino natural.
+Iluminación natural difusa y pareja desde arriba, sombras suaves.
+Composición limpia siguiendo regla de tercios. El producto es el protagonista.
+Estética Pinterest/Instagram nórdica-minimalista, muy aspiracional.
+SIN texto. Formato cuadrado 1:1.`},
+
+  {id:'scale', cat:'INFORMATIVA', name:'08 · Escala / Tamaño',
+   prompt: (n,d) => `Fotografía de referencia de tamaño de ${n}.${d?` ${d.slice(0,80)}.`:''}
+El producto aparece junto a objetos cotidianos reconocibles para dar escala inmediata:
+una mano femenina sosteniendo o tocando el producto, una taza de café estándar, y una regla o moneda.
+Fondo gris claro neutro o blanco. Iluminación de estudio suave y pareja, sin sombras duras.
+La composición es clara e intuitiva — el tamaño real se entiende en un segundo.
+Estilo catálogo IKEA, muy limpio y funcional. SIN texto. Formato cuadrado 1:1.`},
+
+  {id:'context', cat:'LIFESTYLE', name:'09 · En el Ambiente Real',
+   prompt: (n,d) => `Fotografía de ambiente real con ${n} integrado en su entorno natural y apropiado.${d?` ${d.slice(0,80)}.`:''}
+ESCENARIO INTELIGENTE — elige el ambiente exactamente correcto para el producto:
+- Silla de oficina / escritorio / silla gaming → oficina moderna luminosa: escritorio con computador, estantería, plantas, ventana con luz natural, piso de madera
+- Silla o mesa de comedor / vajilla / mantelería → comedor familiar chileno luminoso: mesa bien puesta, sillas alrededor, ventana con luz natural, fondo cocina abierta
+- Sofá / sillón / puf / living → living moderno: piso madera, alfombra, mesita de centro, plantas monstera, luz cálida
+- Mueble de dormitorio / velador / espejo → dormitorio ordenado y luminoso, ropa de cama neutra, plantas, luz matinal
+- Mueble exterior / silla de terraza / parasol / BBQ → terraza o jardín real: pasto verde, plantas, luz solar natural, cielo visible
+- Accesorio de cocina / electrodoméstico → cocina moderna luminosa, encimera clara, ingredientes naturales como props
+- Herramienta / taladradora / lijadora → taller u obra luminosa, materiales de trabajo presentes
+- Artículo deportivo / bicicleta → exterior real iluminado o gimnasio profesional
+La escena debe verse COMPLETAMENTE REAL — como si un fotógrafo entrara a esa casa/oficina/terraza.
+Luz natural abundante o iluminación cálida del ambiente. Muy luminoso y acogedor.
+Decoración coherente con el uso real del producto. El producto es el protagonista.
+Fotografía de interiorismo profesional, f/4.0. SIN texto. Formato cuadrado 1:1.`},
+
+  {id:'packaging', cat:'CONFIANZA', name:'10 · Unboxing + Caja',
+   prompt: (n,d) => `Fotografía de unboxing de ${n} con su packaging.${d?` ${d.slice(0,80)}.`:''}
+El producto está parcialmente emergiendo de su caja abierta o colocado junto a ella.
+Ambos perfectamente visibles: el producto se ve impecable, la caja se ve resistente y bien diseñada.
+Fondo blanco limpio con sombra drop suave. Iluminación de estudio difusa, colores fieles al real.
+Transmite confianza total: el comprador ve exactamente qué recibirá y cómo llegará.
+Estilo fotografía de producto Amazon/Falabella premium. SIN texto. Formato cuadrado 1:1.`},
+
+  {id:'before_after', cat:'CONVERSIÓN', name:'11 · Antes y Después',
+   overlay: 'before-after',
+   prompt: (n,d) => `Split image, two halves divided by a sharp vertical line at the exact center.
+
+LEFT HALF — THE PROBLEM (before owning anything):
+Show ONLY the pain point or uncomfortable situation that ${n} solves. A real person experiencing discomfort, disorder, or frustration.
+CRITICAL: The product "${n}" does NOT exist on the left side. Zero products visible. Show the raw problem: bad posture, cluttered space, broken old item, physical discomfort, whatever the problem is.
+Cold desaturated blue-gray tones. Dim unflattering lighting. Tired or frustrated expression.
+
+RIGHT HALF — THE SOLUTION (after, with the product in use):
+Show the EXACT SAME PERSON now relaxed and happy, using ${n} in a clean beautiful space.${d ? ` ${d.slice(0,80)}.` : ''}
+The product ${n} is clearly visible and being actively used.
+Warm golden tones, bright clean lighting, satisfied smile, organized beautiful environment.
+
+NO text, NO labels, NO words anywhere in the image — text will be added separately.
+Dramatic commercial photography. Square 1:1 format.`},
+
+  {id:'cinematic', cat:'PREMIUM', name:'12 · Render Cinematic',
+   prompt: (n,d) => `Fotografía cinematográfica ultra-premium de ${n}.${d?` ${d.slice(0,80)}.`:''}
+AMBIENTE CONTEXTUAL PREMIUM — recrea el entorno ideal para el producto con estética de campaña de lujo:
+- Silla de oficina → oficina ejecutiva de diseño premium: escritorio de mármol o madera oscura, ventanal con vista ciudad al atardecer, iluminación cálida elegante
+- Silla/mesa de comedor → comedor fine dining minimalista: mesa larga de madera premium, velas encendidas, luz cálida tenue pero suficiente, cubiertos elegantes
+- Sofá / sillón → living de penthouse: vista panorámica al fondo, luz de atardecer entrando por ventanales, paleta cálida dorada
+- Mueble exterior → terraza de hotel o penthouse premium al atardecer, luces cálidas, ciudad o mar al fondo
+- Electrónica → set minimalista premium, superficie negra brillante, luz rim lateral que delimita el producto, fondo gris oscuro elegante (NO negro total)
+- Herramienta / equipamiento → taller artesanal premium, madera noble, iluminación industrial cálida
+Iluminación CINEMATOGRÁFICA pero ILUMINADA: spot principal dramático + relleno lateral suficiente para ver todos los detalles.
+NO completamente oscuro — el producto debe estar bien visible con atmósfera de lujo.
+Fondo oscuro elegante (gris carbón, azul medianoche, marrón oscuro) pero NO negro puro.
+Tonos medios ricos y saturados, calidad fotorrealista de campaña de marca premium.
+SIN texto. Formato cuadrado 1:1.`},
+];
+let selectedShots = new Set(SHOTS.map(s=>s.id));
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+const panelTitles = {
+  titles:['🏆','Títulos SEO — MercadoLibre Chile'],
+  desc:  ['📝','Descripción Profesional'],
+  audit: ['🔍','Auditoría de Publicación'],
+  spy:   ['🕵️','Psicología del Comprador Chileno'],
+  images:['🎨','Imágenes con IA'],
+  brand: ['💎','Brand Advisor'],
+  price: ['💰','Calculadora de Precio'],
+  answer:['💬','Responder Preguntas'],
+  ads:   ['🎯','Análisis de Campañas Ads']
+};
+document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('panel-'+item.dataset.panel).classList.add('active');
+    const t = panelTitles[item.dataset.panel];
+    if (t) {
+      document.getElementById('mainIcon').textContent = t[0];
+      document.getElementById('mainTitle').textContent = t[1];
+    }
+  });
+});
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+document.getElementById('btnOpenCfg').addEventListener('click', () => {
+  document.getElementById('cfgOpenAI').value   = KEYS.openai;
+  document.getElementById('cfgGemini').value   = KEYS.gemini;
+  document.getElementById('cfgTogether').value = KEYS.together;
+  document.getElementById('modalCfg').classList.add('open');
+});
+document.getElementById('btnCloseCfg').addEventListener('click', () => document.getElementById('modalCfg').classList.remove('open'));
+document.getElementById('btnSaveCfg').addEventListener('click', () => {
+  KEYS.openai   = document.getElementById('cfgOpenAI').value.trim();
+  KEYS.gemini   = document.getElementById('cfgGemini').value.trim();
+  KEYS.together = document.getElementById('cfgTogether').value.trim();
+  localStorage.setItem('sm_openai',   KEYS.openai);
+  localStorage.setItem('sm_gemini',   KEYS.gemini);
+  localStorage.setItem('sm_together', KEYS.together);
+  document.getElementById('modalCfg').classList.remove('open');
+  checkImageKeys();
+  toast('✅ Configuración guardada');
+});
+document.getElementById('lnkOpenAI').addEventListener('click', e => { e.preventDefault(); window.open('https://platform.openai.com/api-keys','_blank'); });
+document.getElementById('lnkGemini').addEventListener('click', e => { e.preventDefault(); window.open('https://aistudio.google.com/apikey','_blank'); });
+document.getElementById('lnkTogether').addEventListener('click', e => { e.preventDefault(); window.open('https://api.together.ai/settings/billing','_blank'); });
+
+// ── API CALLS ─────────────────────────────────────────────────────────────────
+async function callClaude(prompt, maxTokens=1800) {
+  const licKey = localStorage.getItem('sm_lic_key') || '';
+  if (!licKey) throw new Error('Activá tu licencia primero en ⚙️');
+  const res = await fetch('/api/ai', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-License-Key':licKey},
+    body:JSON.stringify({prompt, maxTokens})
+  });
+  if(!res.ok){ const e=await res.json().catch(()=>({})); throw new Error(e?.error||'Error servidor '+res.status); }
+  const d = await res.json();
+  return d.text;
+}
+
+// Claude Vision: envía imagen + texto (para análisis de capturas de campañas)
+async function callClaudeVision(prompt, imageB64, maxTokens=2000) {
+  const licKey = localStorage.getItem('sm_lic_key') || '';
+  if (!licKey) throw new Error('Activá tu licencia primero en ⚙️');
+  const res = await fetch('/api/ai', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-License-Key':licKey},
+    body:JSON.stringify({prompt, imageB64, maxTokens})
+  });
+  if(!res.ok){ const e=await res.json().catch(()=>({})); throw new Error(e?.error||'Error servidor Vision '+res.status); }
+  const d = await res.json();
+  return d.text;
+}
+
+// ── IMAGEN IA — Together AI directo (browser) → Gemini directo (browser) ─────
+// Adapta el prompt para modo imagen→imagen (indica usar el producto de la foto de referencia)
+function adaptPromptImg2Img(prompt) {
+  return `INSTRUCCIÓN CRÍTICA: Usa el producto EXACTO que aparece en la imagen de referencia adjunta — mismo diseño, mismos colores, mismos materiales, misma forma. NO inventes ni reemplaces el producto.
+
+${prompt}
+
+RECUERDA: El producto de la imagen de referencia debe aparecer IDÉNTICO en el resultado. Solo cambia el escenario, la iluminación y el estilo según las instrucciones de arriba.`;
+}
+
+async function callOpenAIImage(prompt) {
+  if (!KEYS.openai) throw new Error('Sin OpenAI key');
+  // DALL-E 3 tiene límite de 4000 chars en el prompt
+  const truncated = prompt.slice(0, 3900);
+  const res = await fetch('https://api.openai.com/v1/images/generations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${KEYS.openai}` },
+    body: JSON.stringify({
+      model: 'dall-e-3',
+      prompt: truncated,
+      n: 1,
+      size: '1024x1024',
+      quality: 'standard',
+      response_format: 'b64_json'
+    })
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) throw new Error(data.error?.message?.slice(0,120) || `OpenAI error ${res.status}`);
+  const b64 = data.data?.[0]?.b64_json;
+  if (!b64) throw new Error('DALL-E 3: sin imagen en respuesta');
+  return `data:image/png;base64,${b64}`;
+}
+
+async function callTogetherAI(prompt, imageB64=null) {
+  if (!KEYS.together) throw new Error('Sin Together AI key');
+  let payload;
+  if (imageB64) {
+    // FLUX.1-kontext-max: image editing / image-to-image
+    payload = {
+      model: 'black-forest-labs/FLUX.1-kontext-max',
+      prompt: adaptPromptImg2Img(prompt),
+      image_url: imageB64,
+      n: 1, steps: 28, width: 1024, height: 1024,
+      response_format: 'b64_json'
+    };
+  } else {
+    // FLUX.1-schnell: text-to-image (más rápido y barato)
+    payload = {
+      model: 'black-forest-labs/FLUX.1-schnell',
+      prompt, n: 1, steps: 4, width: 1024, height: 1024,
+      response_format: 'b64_json'
+    };
+  }
+  const res = await fetch('https://api.together.xyz/v1/images/generations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${KEYS.together}` },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (res.status === 402) throw new Error('CREDITS_EMPTY');
+  if (!res.ok || data.error) throw new Error(data.error?.message?.slice(0,100) || `Error ${res.status}`);
+  const b64 = data.data?.[0]?.b64_json;
+  const url = data.data?.[0]?.url;
+  if (b64) return `data:image/png;base64,${b64}`;
+  if (url) return url;
+  throw new Error('Sin imagen en respuesta Together AI');
+}
+
+async function callGeminiImage(prompt, imageB64=null) {
+  if (!KEYS.gemini) throw new Error('Configura Gemini API Key en ⚙️ (gratis en aistudio.google.com/apikey)');
+  const parts = [{ text: imageB64 ? adaptPromptImg2Img(prompt) : prompt }];
+  if (imageB64) {
+    const mime = imageB64.split(';')[0].split(':')[1];
+    const data = imageB64.split(',')[1];
+    parts.push({ inlineData: { mimeType: mime, data } });
+  }
+  const body = JSON.stringify({
+    contents: [{ parts }],
+    generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+  });
+  const headers = { 'Content-Type': 'application/json' };
+  // Modelos Gemini con soporte de generación de imagen nativa (verificados mayo 2025)
+  const models = [
+    'gemini-2.5-flash-image',
+    'gemini-3.1-flash-image-preview',
+    'gemini-3-pro-image-preview',
+  ];
+  let lastErr = '';
+  for (const model of models) {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${KEYS.gemini}`, { method:'POST', headers, body });
+    const data = await res.json();
+    if (!res.ok || data.error) { lastErr = data.error?.message?.slice(0,120) || `Gemini ${model} ${res.status}`; continue; }
+    const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+    if (!part) { lastErr = `${model}: no devolvió imagen`; continue; }
+    return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+  }
+  throw new Error(lastErr || 'Gemini no pudo generar la imagen');
+}
+
+async function callImageAI(prompt, imageB64=null) {
+  if (imageB64) {
+    // Con foto de referencia: Gemini primero (único que hace image-to-image nativo)
+    if (KEYS.gemini) {
+      try { return await callGeminiImage(prompt, imageB64); }
+      catch(e) {
+        const isQuota = e.message.toLowerCase().includes('quota') || e.message.toLowerCase().includes('exceeded');
+        if (!isQuota) throw e;
+        console.warn('[SpaceMELI] Gemini quota agotada, fallback');
+        toast('⚠️ Gemini sin quota — usando alternativa (sin referencia de foto)');
+      }
+    }
+    // Fallback img-to-img: Together FLUX-kontext
+    if (KEYS.together) {
+      try { return await callTogetherAI(prompt, imageB64); }
+      catch(e) {
+        if (e.message === 'CREDITS_EMPTY') { /* seguir */ }
+        else return await callTogetherAI(prompt); // img falló, texto solo
+      }
+    }
+    // Último recurso con foto: DALL-E 3 texto (sin la foto de referencia)
+    if (KEYS.openai) {
+      toast('⚠️ Usando DALL-E 3 sin foto de referencia');
+      return await callOpenAIImage(prompt);
+    }
+    throw new Error('Sin providers disponibles. Configurá al menos una API Key en ⚙️.');
+  }
+
+  // Sin foto: DALL-E 3 primero (mejor calidad y consistencia de estilo)
+  if (KEYS.openai) {
+    try { return await callOpenAIImage(prompt); }
+    catch(e) {
+      console.warn('[SpaceMELI] DALL-E 3 falló:', e.message);
+      // continuar con fallbacks
+    }
+  }
+  if (KEYS.together) {
+    try { return await callTogetherAI(prompt); }
+    catch(e) { if (e.message !== 'CREDITS_EMPTY') throw e; }
+  }
+  if (KEYS.gemini) return await callGeminiImage(prompt);
+  throw new Error('Configurá OpenAI, Together AI o Gemini en ⚙️ para generar imágenes');
+}
+
+async function blobToDataUrl(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+// Alias
+async function callGemini(parts) {
+  return await callImageAI(parts.find(p => p.text)?.text || '');
+}
+
+// ── STATUS ────────────────────────────────────────────────────────────────────
+function setStatus(s, t) {
+  const el = document.getElementById('statusPill');
+  el.className = 'status-pill ' + s;
+  el.textContent = t;
+}
+
+// ── GET PRODUCT ───────────────────────────────────────────────────────────────
+function getProduct() {
+  const t = document.getElementById('productInput').value.trim();
+  if (!t) throw new Error('Escribe el nombre del producto primero');
+  return t;
+}
+
+// ── GENERATE ALL ──────────────────────────────────────────────────────────────
+document.getElementById('btnIA').addEventListener('click', async () => {
+  try { getProduct(); } catch(e) { toast('⚠️ '+e.message); return; }
+  genTitles();
+});
+
+// ── TÍTULOS ───────────────────────────────────────────────────────────────────
+const CAT_COLORS = {
+  'SEO TÉCNICO':'var(--cyan)','EMOCIONAL':'var(--purple)','KEYWORD PRINCIPAL':'var(--green)',
+  'URGENCIA':'var(--red)','SPECS TÉCNICAS':'var(--gold)','DIFERENCIACIÓN':'var(--cyan2)',
+  'TENDENCIA':'var(--purple)','CONVERSIÓN DIRECTA':'var(--gold)'
+};
+async function genTitles() {
+  const name = getProduct();
+  const out = document.getElementById('titlesOut');
+  out.innerHTML = '<div class="loading"><div class="spin"></div>Generando 10 títulos SEO...</div>';
+  setStatus('loading','Generando títulos...');
+  try {
+    const dims = getDimsText();
+    const r = await callClaude(`Eres un especialista avanzado en optimización de títulos para Mercado Libre Chile y Mercado Ads. Tu objetivo es generar títulos altamente vendedores, optimizados para SEO interno de Mercado Libre, CTR, conversión y rendimiento en Product Ads.
+
+Mercado Libre prioriza publicaciones considerando: calidad del anuncio, CTR, conversión, historial de ventas, relevancia de palabras clave, ad-rank y ad-score. Los títulos optimizados obtienen más clics, mejor posicionamiento, escalan mejor en campañas y pagan menos por resultados más eficientes.
+${kb('titulos-seo','calidad-publicacion')}
+PRODUCTO: ${name}${dims}
+PAÍS: Chile 🇨🇱
+
+REGLAS OBLIGATORIAS:
+- Palabras clave más importantes al inicio
+- Máximo 60 caracteres preferentemente, sin exceder 120
+- Sin emojis, sin símbolos: ! ? * # / \\ % @
+- Sin mayúsculas abusivas ni relleno
+- Sin frases prohibidas: "envío gratis", "el mejor", "oferta", "imperdible"
+- No repetir palabras innecesariamente
+- Estructura natural: Tipo producto + Marca + Modelo + Característica + Medida/Color + Diferenciador
+- Basarse en búsquedas reales con intención de compra en Mercado Libre Chile
+- Optimizar para: visibilidad, CTR, conversión, Product Ads, posicionamiento orgánico
+
+Analiza qué buscaría el comprador, qué palabras tienen intención de compra, qué atributos ayudan al SEO, qué información mejora conversión, qué elementos aumentan CTR y cuáles sobran.
+
+Devuelve EXACTAMENTE este formato (10 líneas con pipe):
+SEO TÉCNICO | título aquí
+EMOCIONAL | título aquí
+KEYWORD PRINCIPAL | título aquí
+URGENCIA | título aquí
+SPECS TÉCNICAS | título aquí
+DIFERENCIACIÓN | título aquí
+TENDENCIA | título aquí
+CONVERSIÓN DIRECTA | título aquí
+PRODUCTO ADS | título aquí
+POSICIONAMIENTO | título aquí
+
+Luego agrega estas secciones EXACTAS en líneas separadas:
+KEYWORDS_TOP: keyword1, keyword2, keyword3, keyword4, keyword5
+MEJOR_PARA_ADS: [título exacto más recomendado para campañas Product Ads — debe maximizar ad-rank y conversión]
+TIP_CTR: [recomendación concreta de 1-2 oraciones para mejorar CTR en este producto específico]`, 1000);
+
+    // Parsear títulos formato "CAT | titulo"
+    const SKIP_CAT = ['tipo','título','title','---','type','estrategia','categoria','category','#','keywords','mejor','tip'];
+    const SKIP_TIT = ['título','title','estado','caracteres','category','tipo'];
+    const lines = r.split('\n').filter(l => l.includes('|'));
+    const parsed = lines.map(line => {
+      const parts = line.split('|').map(p => p.trim().replace(/\*\*/g,'')).filter(p => p.length > 0);
+      if (parts.length < 2) return null;
+      const catRaw = parts[0];
+      const cat = catRaw.toUpperCase();
+      const tit = parts.slice(1).join(' ').trim().replace(/,(\w)/g, ' $1');
+      if (SKIP_CAT.some(s => catRaw.toLowerCase().includes(s))) return null;
+      if (SKIP_TIT.some(s => tit.toLowerCase().includes(s))) return null;
+      if (!tit || tit.length < 8) return null;
+      return { cat, tit };
+    }).filter(Boolean);
+
+    // Parsear secciones extra
+    const kwMatch  = r.match(/KEYWORDS?_TOP\s*[:=]\s*(.+)/i);
+    const adsMatch = r.match(/MEJOR_PARA_ADS\s*[:=]\s*(.+)/i);
+    const ctrMatch = r.match(/TIP_CTR\s*[:=]\s*(.+)/i);
+    const keywords = kwMatch  ? kwMatch[1].trim()  : '';
+    const mejorAds = adsMatch ? adsMatch[1].trim() : '';
+    const tipCtr   = ctrMatch ? ctrMatch[1].trim() : '';
+
+    const titlesHtml = parsed.map(({cat, tit}) => {
+      const color = CAT_COLORS[cat] || 'var(--cyan)';
+      const chars = tit.length;
+      return `<div class="title-item" data-title="${tit.replace(/"/g,'&quot;')}">
+        <div class="t-cat" style="color:${color}">${cat}</div>
+        <div class="t-text">${tit}</div>
+        <div class="t-chars ${chars<=60?'ok':'long'}">${chars}/60</div>
+      </div>`;
+    }).join('');
+
+    const extrasHtml = `
+      ${keywords ? `<div class="audit-section" style="margin-top:12px">
+        <div class="audit-section-title" style="color:var(--green)">🔑 Keywords Principales</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.7">${keywords}</div>
+      </div>` : ''}
+      ${mejorAds ? `<div class="audit-section">
+        <div class="audit-section-title" style="color:#a78bfa">🎯 Mejor Título para Product Ads</div>
+        <div class="title-item" data-title="${mejorAds.replace(/"/g,'&quot;')}" style="border:1px solid #a78bfa40">
+          <div class="t-cat" style="color:#a78bfa">RECOMENDADO ADS</div>
+          <div class="t-text">${mejorAds}</div>
+          <div class="t-chars ${mejorAds.length<=60?'ok':'long'}">${mejorAds.length}/60</div>
+        </div>
+      </div>` : ''}
+      ${tipCtr ? `<div class="audit-section">
+        <div class="audit-section-title" style="color:var(--gold)">⚡ Tip CTR</div>
+        <div style="font-size:11px;color:var(--text);line-height:1.6">${tipCtr}</div>
+      </div>` : ''}
+    `;
+
+    out.innerHTML = titlesHtml + extrasHtml +
+      '<div style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px">Haz clic en cualquier título para copiarlo</div>';
+    setStatus('ready','✓ Listo');
+    toast('✅ 10 títulos generados');
+  } catch(e) {
+    out.innerHTML = `<div style="color:var(--red);padding:16px;font-size:12px">⚠️ ${e.message}</div>`;
+    setStatus('error','Error');
+  }
+}
+document.getElementById('btnGenTitles').addEventListener('click', genTitles);
+document.getElementById('titlesOut').addEventListener('click', e => {
+  const item = e.target.closest('.title-item');
+  if (item) { copyText(item.querySelector('.t-text').textContent); }
+});
+
+// ── DESCRIPCIÓN ───────────────────────────────────────────────────────────────
+async function genDesc() {
+  const name = getProduct();
+  const out = document.getElementById('descOut');
+  out.textContent = 'Generando descripción completa...';
+  setStatus('loading','Generando...');
+  try {
+    const dims = getDimsText();
+    const r = await callClaude(`Eres un especialista en optimización de publicaciones de MercadoLibre Chile. Tu misión es crear descripciones que aumenten la conversión, mejoren el CTR, potencien los Product Ads y reduzcan el ACOS.
+${kb('descripcion','politicas')}
+
+REGLAS OBLIGATORIAS — INCUMPLIRLAS ARRUINA LA PUBLICACION:
+- NUNCA uses emojis, simbolos Unicode decorativos (✦ ✔ ━ → ❓ ✅ 📦 ★ etc.) ni caracteres especiales de ningun tipo
+- SOLO texto plano con mayusculas para titulos de seccion y guiones para listas
+- No inventes información del producto — si no sabes un dato, usa "[completar]" como placeholder
+- SIEMPRE incluir en Especificaciones: dimensiones del producto (cm), peso del producto (kg), dimensiones del embalaje (cm), peso con embalaje (kg), y capacidad de carga/peso soportado si aplica (sillas, mesas, estantes, camas, etc.). Son datos de compra obligatorios — el comprador los necesita antes de decidir
+- No uses frases genéricas vacías ni superlativos sin respaldo ("el mejor del mundo", "calidad premium sin igual")
+- Tono directo, cercano y honesto, como habla un vendedor chileno confiable — tuteo natural
+- Sin mayúsculas excesivas fuera de los encabezados de sección
+- Largo ideal: 400-700 palabras. Nunca menos de 200.
+- Una descripción con emojis o símbolos puede ser penalizada por el algoritmo de MELI
+
+PRODUCTO: ${name}${dims}
+PAIS: Chile
+
+ESTRUCTURA EXACTA (copia este formato, sin modificar los encabezados):
+
+[TITULAR]
+Escribe aqui el beneficio principal del producto en 1 linea directa y convincente
+
+--------------------------------------------------
+
+INTRODUCCION
+
+Parrafo 1: Que es el producto y para quien es ideal. Tono cercano, chileno.
+Parrafo 2: Por que es la mejor opcion. Beneficio principal con argumento real.
+
+--------------------------------------------------
+
+CARACTERISTICAS PRINCIPALES
+
+- [Caracteristica clave + beneficio concreto]
+- [Caracteristica 2 + beneficio]
+- [Caracteristica 3 + beneficio]
+- [Caracteristica 4 + beneficio]
+- [Caracteristica 5 + beneficio]
+
+--------------------------------------------------
+
+ESPECIFICACIONES TECNICAS
+
+- Material: [dato]
+- Dimensiones del producto: [largo x ancho x alto en cm — OBLIGATORIO, usar [completar] si no se sabe]
+- Peso del producto: [kg — OBLIGATORIO]
+- Capacidad de carga / Peso maximo soportado: [kg — OBLIGATORIO si el producto puede cargar personas u objetos, por ejemplo sillas, mesas, estantes, camas, hamacas, etc. Indica claramente el maximo que soporta]
+- Dimensiones del embalaje: [largo x ancho x alto en cm — OBLIGATORIO para que el comprador sepa el bulto que recibirá]
+- Peso con embalaje: [kg — OBLIGATORIO]
+- Color/Acabado: [dato]
+- [Otra especificacion relevante del producto]
+
+--------------------------------------------------
+
+CONTENIDO DEL PAQUETE
+
+- [Que incluye exactamente — lista cada elemento]
+
+--------------------------------------------------
+
+RECOMENDACIONES DE USO
+
+- [Recomendacion de uso o instalacion 1]
+- [Recomendacion 2]
+- [Para quien esta ideal — perfil del comprador]
+
+--------------------------------------------------
+
+PREGUNTAS FRECUENTES
+
+Pregunta: [Sobre uso o compatibilidad]
+Respuesta: [Respuesta directa que genera confianza]
+
+Pregunta: [Sobre despacho o plazo de entrega]
+Respuesta: [Respuesta directa]
+
+Pregunta: [Sobre garantia o devolucion]
+Respuesta: [Respuesta directa]
+
+Pregunta: [Sobre calidad o durabilidad]
+Respuesta: [Respuesta directa]
+
+Pregunta: [Sobre precio vs competencia]
+Respuesta: [Respuesta que neutraliza la objecion]
+
+--------------------------------------------------
+
+GARANTIA E INFORMACION
+
+Indicar despacho a todo Chile, embalaje protegido, garantia del producto y politica de cambios. Texto plano, 2-3 lineas.`, 2500);
+    out.textContent = r;
+    document.getElementById('descChars').textContent = r.length + ' caracteres';
+    setStatus('ready','✓ Listo');
+    toast('✅ Descripción generada');
+  } catch(e) {
+    out.textContent = '⚠️ ' + e.message;
+    setStatus('error','Error');
+  }
+}
+document.getElementById('btnGenDesc').addEventListener('click', genDesc);
+document.getElementById('btnCopyDesc').addEventListener('click', () => copyText(document.getElementById('descOut').textContent));
+
+// ── AUDITORÍA ─────────────────────────────────────────────────────────────────
+
+// Toggle Product Ads fields
+document.getElementById('auditHasAds').addEventListener('change', function() {
+  document.getElementById('auditAdsFields').style.display = this.checked ? 'flex' : 'none';
+});
+
+function _auditParse(raw) {
+  // Parse structured sections from Claude response
+  const sections = {};
+  let cur = null;
+  for (const line of raw.split('\n')) {
+    const t = line.trim();
+    if (!t) continue;
+    const m = t.match(/^([A-Z_]{3,})\s*[:=]\s*(.*)/);
+    if (m) { cur = m[1]; sections[cur] = (sections[cur]||'') + (m[2]?m[2]+'\n':''); }
+    else if (cur) { sections[cur] += t + '\n'; }
+  }
+  // Also extract bullet lists
+  const bullets = {};
+  let bmode = null;
+  for (const line of raw.split('\n')) {
+    const t = line.trim();
+    const bm = t.match(/^([A-Z_]{3,})\s*[:=]/);
+    if (bm) bmode = bm[1];
+    else if (t.startsWith('- ') && bmode) { bullets[bmode] = bullets[bmode]||[]; bullets[bmode].push(t.slice(2)); }
+    else if (t.match(/^\d+\.\s/) && bmode) { bullets[bmode] = bullets[bmode]||[]; bullets[bmode].push(t.replace(/^\d+\.\s/,'')); }
+  }
+  return { sections, bullets };
+}
+
+function _auditSection(title, color, items, icon='•') {
+  if (!items || !items.length) return '';
+  return `<div class="audit-section">
+    <div class="audit-section-title" style="color:${color}">${title}</div>
+    ${items.map(i=>`<div class="audit-item" style="border-left:2px solid ${color}20;padding-left:8px;margin-bottom:5px;font-size:11px;line-height:1.5">${icon} ${i}</div>`).join('')}
+  </div>`;
+}
+
+function _auditKV(label, val, color='var(--text)') {
+  if (!val || val.trim()==='') return '';
+  return `<div style="display:flex;gap:8px;align-items:baseline;margin-bottom:4px">
+    <span style="font-size:9px;color:var(--dim);min-width:90px;flex-shrink:0;font-weight:700;text-transform:uppercase">${label}</span>
+    <span style="font-size:11px;color:${color};line-height:1.4">${val.trim()}</span>
+  </div>`;
+}
+
+async function genAudit() {
+  const name = getProduct();
+  const out = document.getElementById('auditOut');
+  out.innerHTML = '<div class="loading"><div class="spin"></div>Analizando publicación completa...</div>';
+  setStatus('loading','Auditando...');
+  try {
+    // Collect all context
+    const titleEl  = document.getElementById('titleOut');
+    const descEl   = document.getElementById('descOut');
+    const curTitle = titleEl ? titleEl.textContent.trim() : '';
+    const curDesc  = descEl  ? descEl.textContent.trim().slice(0,400) : '';
+    const url        = document.getElementById('auditUrl').value.trim();
+    const precio     = document.getElementById('auditPrice').value.trim();
+    const compPrecio = document.getElementById('auditCompPrice').value.trim();
+    const competidores = document.getElementById('auditCompetitors').value.trim();
+    const metricas   = document.getElementById('auditMetrics').value.trim();
+    const hasAds     = document.getElementById('auditHasAds').checked;
+    const acos       = document.getElementById('auditAcos').value.trim();
+    const inversion  = document.getElementById('auditInversion').value.trim();
+    const clics      = document.getElementById('auditClics').value.trim();
+    const ventasAds  = document.getElementById('auditVentasAds').value.trim();
+    const adsExtra   = document.getElementById('auditAdsExtra').value.trim();
+    const objectives = [...document.querySelectorAll('#auditGoals input:checked')].map(c=>c.value).join(', ');
+
+    const adsBlock = hasAds ? `
+PRODUCT ADS (campaña activa):
+- ACOS: ${acos||'no especificado'}
+- Inversión: ${inversion||'no especificado'}
+- Clics: ${clics||'no especificado'}
+- Ventas por ads: ${ventasAds||'no especificado'}
+${adsExtra?`- Datos adicionales: ${adsExtra}`:''}` : '';
+
+    const prompt = `Eres un especialista avanzado en optimización de publicaciones y campañas de Mercado Libre Chile enfocado en Mercado Ads y Product Ads. Tu función es analizar publicaciones, campañas publicitarias y métricas para detectar errores, oportunidades de mejora y optimizaciones estratégicas.
+${kb('titulos-seo','imagenes','descripcion','calidad-publicacion','politicas','product-ads','metricas-vendedor')}
+OBJETIVO: Analizar la publicación y detectar problemas en: calidad de publicación, SEO dentro de Mercado Libre, conversión, CTR, rendimiento publicitario, ACOS, estrategia de pujas, experiencia del comprador y cumplimiento de políticas de Mercado Libre.
+
+TONO: Profesional, claro, directo. NO elogies la publicación. Solo menciona errores, áreas de mejora y optimizaciones. Basa TODAS las recomendaciones en datos concretos. Personaliza recomendaciones al producto específico. Prioriza acciones de mayor impacto.
+
+NUNCA: inventes métricas, recomiendes prácticas prohibidas, ni incumplas políticas de Mercado Libre.
+
+═══════════════ PUBLICACIÓN A AUDITAR ═══════════════
+PRODUCTO: ${name}
+${url?`URL: ${url}`:''}
+${curTitle?`TÍTULO ACTUAL: ${curTitle}`:''}
+${curDesc?`DESCRIPCIÓN (extracto): ${curDesc}`:''}
+${precio?`PRECIO ACTUAL: $${precio} CLP`:''}
+${compPrecio?`PRECIO COMPETENCIA: $${compPrecio} CLP`:''}
+${competidores?`COMPETIDORES: ${competidores}`:''}
+OBJETIVOS DEL VENDEDOR: ${objectives||'más ventas'}
+${metricas?`\nMÉTRICAS DE LA PUBLICACIÓN:\n${metricas}`:''}
+${adsBlock}
+
+═══════════════ ANÁLISIS REQUERIDO ═══════════════
+
+Responde con estas secciones EXACTAS (usa los títulos tal cual):
+
+PUNTAJE: [número 0-100 — penaliza fuerte errores graves en título, imágenes, descripción o ads]
+NIVEL: [GANADORA / BUENA / REGULAR / DEFICIENTE / CRÍTICA]
+VEREDICTO: [Una oración directa sobre el estado actual — sin elogios]
+POTENCIAL: [Ej: +45% ventas con cambios propuestos]
+
+DIAGNOSTICO_TITULO:
+[Analiza el título actual. Verifica: longitud óptima (60 chars), uso de keywords relevantes, orden SEO correcto, presencia de marca/modelo/característica/medida/compatibilidad. Detecta: keywords faltantes de alta intención de compra, palabras de relleno, sobreoptimización, errores de estructura, palabras prohibidas. Explica cómo afecta el ad-rank y CTR en Product Ads]
+
+DIAGNOSTICO_IMAGENES:
+[Analiza calidad, cantidad mínima recomendada, tomas obligatorias faltantes (hero blanco, infografía, lifestyle, escala, detalle). Detecta: imágenes poco profesionales, baja diferenciación visual, falta de infografías, problemas de resolución. Impacto en conversión y CTR de campañas]
+
+DIAGNOSTICO_DESCRIPCION:
+[Evalúa escaneabilidad, estructura, beneficios, características técnicas, resolución de dudas frecuentes, palabras clave en el texto, formato. Detecta: texto genérico, información incompleta, mala estructura, falta de persuasión. Las 3 preguntas clave del comprador: qué es, para qué sirve, por qué comprarme]
+
+DIAGNOSTICO_PRECIO:
+[${precio&&compPrecio ? `Precio actual $${precio} vs competencia $${compPrecio}. ` : ''}Analiza competitividad de precio, relación calidad-precio, impacto en conversión y posicionamiento. Si el precio es mayor que la competencia, ¿hay diferenciadores que lo justifiquen?]
+
+SEO_MELI:
+[Top 5 keywords que DEBEN estar en el título (con alta intención de compra chilena). Keywords secundarias para la descripción y ficha técnica. Términos de búsqueda reales que usa el comprador. Orden de palabras recomendado para maximizar relevancia]
+
+CONVERSION:
+[Factores que frenan la decisión de compra. Qué falta para generar confianza: garantía, envío, reputación, FAQ, atributos. CTR estimado con el título actual y cómo mejorarlo. Impacto en ad-score y rendimiento de Product Ads]
+
+${hasAds?`ANALISIS_ADS:
+[Evalúa el ACOS${acos?` de ${acos}%`:''} — ¿es eficiente para esta categoría? ¿Cuál es el ACOS target recomendado? Analiza si el CPC es adecuado, si el presupuesto está bien distribuido, si hay productos que pausar o potenciar. Explica el impacto en ad-rank y ad-score. ROI real con los datos proporcionados]
+`:''}
+ERRORES_CRITICOS:
+- [error más grave que daña ventas y posicionamiento hoy — con impacto específico]
+- [segundo error más grave]
+- [tercer error]
+${hasAds?'- [error crítico en estrategia de Product Ads]':''}
+
+MEJORAS_PRIORITARIAS:
+- [acción concreta #1 — mayor impacto en ventas]
+- [acción concreta #2]
+- [acción concreta #3]
+- [acción concreta #4]
+- [acción concreta #5]
+
+CAMBIOS_INMEDIATOS:
+- [cambio que se puede hacer en 5 minutos con impacto inmediato en CTR o conversión]
+- [segunda acción rápida]
+- [tercera acción rápida]`;
+
+    const r = await callClaude(prompt, 1800);
+    const { sections, bullets } = _auditParse(r);
+
+    const score   = parseInt((sections['PUNTAJE']||'0').trim()) || 0;
+    const nivel   = (sections['NIVEL']||'').trim();
+    const veredicto = (sections['VEREDICTO']||'').trim();
+    const potencial = (sections['POTENCIAL']||'').trim();
+    const color   = score>=80?'var(--green)':score>=60?'var(--gold)':'var(--red)';
+    const nivelEmoji = score>=80?'🏆':score>=60?'✅':score>=40?'⚠️':'🚨';
+
+    const diagTitulo = (sections['DIAGNOSTICO_TITULO']||'').trim();
+    const diagImg    = (sections['DIAGNOSTICO_IMAGENES']||'').trim();
+    const diagDesc   = (sections['DIAGNOSTICO_DESCRIPCION']||'').trim();
+    const diagPrecio = (sections['DIAGNOSTICO_PRECIO']||'').trim();
+    const seo        = (sections['SEO_MELI']||'').trim();
+    const conv       = (sections['CONVERSION']||'').trim();
+    const ads        = (sections['ANALISIS_ADS']||'').trim();
+    const errores    = bullets['ERRORES_CRITICOS'] || [];
+    const mejoras    = bullets['MEJORAS_PRIORITARIAS'] || [];
+    const inmediatos = bullets['CAMBIOS_INMEDIATOS'] || [];
+
+    const diagBlock = (title, icon, text, c='var(--accent)') => text ? `
+      <div class="audit-section">
+        <div class="audit-section-title" style="color:${c}">${icon} ${title}</div>
+        <div style="font-size:11px;line-height:1.6;color:var(--text);white-space:pre-wrap">${text}</div>
+      </div>` : '';
+
+    out.innerHTML = `
+      <!-- SCORE -->
+      <div class="audit-ring-wrap">
+        <div class="audit-ring" style="--rc:${color};--rp:${score}%;color:${color}">${score}</div>
+        <div class="audit-nivel" style="color:${color}">${nivelEmoji} ${nivel}</div>
+        <div class="audit-veredicto">${veredicto}</div>
+        ${potencial?`<div style="font-size:11px;color:var(--green);margin-top:8px;font-weight:700">📈 ${potencial}</div>`:''}
+      </div>
+
+      <!-- ERRORES CRÍTICOS -->
+      ${_auditSection('🚨 Errores Críticos', 'var(--red)', errores, '✗')}
+
+      <!-- DIAGNÓSTICOS -->
+      ${diagTitulo ? diagBlock('Diagnóstico Título','📝', diagTitulo) : ''}
+      ${diagImg    ? diagBlock('Diagnóstico Imágenes','📸', diagImg) : ''}
+      ${diagDesc   ? diagBlock('Diagnóstico Descripción','📄', diagDesc) : ''}
+      ${diagPrecio ? diagBlock('Diagnóstico Precio','💰', diagPrecio, 'var(--gold)') : ''}
+
+      <!-- SEO -->
+      ${seo ? `<div class="audit-section">
+        <div class="audit-section-title" style="color:var(--accent)">🔍 SEO MercadoLibre</div>
+        <div style="font-size:11px;line-height:1.6;color:var(--text);white-space:pre-wrap">${seo}</div>
+      </div>` : ''}
+
+      <!-- CONVERSIÓN -->
+      ${conv ? `<div class="audit-section">
+        <div class="audit-section-title" style="color:var(--accent)">⚡ Análisis de Conversión</div>
+        <div style="font-size:11px;line-height:1.6;color:var(--text);white-space:pre-wrap">${conv}</div>
+      </div>` : ''}
+
+      <!-- PRODUCT ADS -->
+      ${ads ? `<div class="audit-section">
+        <div class="audit-section-title" style="color:#a78bfa">🎯 Análisis Product Ads</div>
+        <div style="font-size:11px;line-height:1.6;color:var(--text);white-space:pre-wrap">${ads}</div>
+      </div>` : ''}
+
+      <!-- MEJORAS PRIORITARIAS -->
+      ${_auditSection('⚡ Mejoras Prioritarias', 'var(--gold)', mejoras, '→')}
+
+      <!-- CAMBIOS INMEDIATOS -->
+      ${_auditSection('⚡ Cambios Inmediatos (5 min)', 'var(--green)', inmediatos, '✓')}
+    `;
+
+    setStatus('ready','✓ Listo');
+    toast('✅ Auditoría completada');
+  } catch(e) {
+    out.innerHTML = `<div style="color:var(--red);padding:16px;font-size:12px">⚠️ ${e.message}</div>`;
+    setStatus('error','Error');
+  }
+}
+document.getElementById('btnGenAudit').addEventListener('click', genAudit);
+document.getElementById('btnGenAudit2').addEventListener('click', genAudit);
+
+// ── CAMPAÑAS ADS ──────────────────────────────────────────────────────────────
+async function genAds() {
+  const out = document.getElementById('adsOut');
+  out.innerHTML = '<div class="loading"><div class="spin"></div>Analizando campaña Product Ads...</div>';
+  setStatus('loading','Analizando campaña...');
+  try {
+    const name        = getProduct();
+    const campName    = document.getElementById('adsCampName').value.trim();
+    const period      = document.getElementById('adsPeriod').value.trim();
+    const impresiones = document.getElementById('adsImpresiones').value.trim();
+    const clics       = document.getElementById('adsClics').value.trim();
+    const ctr         = document.getElementById('adsCtr').value.trim();
+    const ventas      = document.getElementById('adsVentas').value.trim();
+    const ventasAsis  = document.getElementById('adsVentasAsis').value.trim();
+    const ingresos    = document.getElementById('adsIngresos').value.trim();
+    const inversion   = document.getElementById('adsInversion').value.trim();
+    const acos        = document.getElementById('adsAcos').value.trim();
+    const cpc         = document.getElementById('adsCpc').value.trim();
+    const presupuesto = document.getElementById('adsPresupuesto').value.trim();
+    const conv        = document.getElementById('adsConv').value.trim();
+    const context     = document.getElementById('adsContext').value.trim();
+    const objectives  = [...document.querySelectorAll('#adsGoals input:checked')].map(c=>c.value).join(', ');
+
+    // Calcular ROAS si hay datos
+    const roasCalc = (ingresos && inversion && parseFloat(inversion) > 0)
+      ? (parseFloat(ingresos.replace(/[.$,]/g,'')) / parseFloat(inversion.replace(/[.$,]/g,''))).toFixed(2)
+      : null;
+
+    const prompt = `Eres un especialista avanzado en Mercado Libre Chile y Mercado Ads, enfocado en análisis y optimización de campañas Product Ads.
+${kb('product-ads','metricas-vendedor','calidad-publicacion')}
+Tu análisis debe ser profesional, claro, accesible y accionable. Evita tecnicismos innecesarios.
+NO elogies las campañas — menciona únicamente errores, oportunidades y mejoras.
+Basa TODAS las recomendaciones en los datos concretos proporcionados.
+
+═══════════════ DATOS DE LA CAMPAÑA ═══════════════
+PRODUCTO: ${name}
+${campName?`CAMPAÑA: ${campName}`:''}
+${period?`PERÍODO: ${period}`:''}
+
+MÉTRICAS:
+- Impresiones: ${impresiones||'no especificado'}
+- Clics: ${clics||'no especificado'}
+- CTR: ${ctr||'no especificado'}%
+- Ventas directas: ${ventas||'no especificado'}
+- Ventas asistidas: ${ventasAsis||'no especificado'}
+- Ingresos: $${ingresos||'no especificado'}
+- Inversión: $${inversion||'no especificado'}
+- ACOS: ${acos||'no especificado'}%
+- CPC promedio: $${cpc||'no especificado'}
+- Presupuesto diario: $${presupuesto||'no especificado'}
+- Tasa de conversión: ${conv||'no especificado'}%
+${roasCalc?`- ROAS calculado: ${roasCalc}x`:''}
+
+OBJETIVOS: ${objectives||'optimizar campaña'}
+${context?`CONTEXTO ADICIONAL: ${context}`:''}
+
+═══════════════ ANÁLISIS REQUERIDO ═══════════════
+
+Responde con estas secciones EXACTAS:
+
+DIAGNOSTICO_GENERAL:
+[Resumen ejecutivo en 2-3 oraciones: ¿la campaña es rentable? ¿cuál es el problema principal?]
+
+SCORE_ACOS: [número 0-100 donde 100=ACOS óptimo, penaliza fuertemente ACOS alto]
+NIVEL_CAMPANA: [RENTABLE / ACEPTABLE / MEJORABLE / INEFICIENTE / CRÍTICA]
+
+ANALISIS_CTR:
+[Evalúa el CTR. Para Mercado Libre Chile, CTR promedio es 0.5-2%. Diagnóstico: ¿las impresiones se convierten bien en clics? Causas si es bajo. Qué mejorar en imagen principal, título o precio]
+
+ANALISIS_ACOS:
+[Evalúa el ACOS específico de este producto/categoría. ¿Cuál es el ACOS target recomendado? ¿Es la inversión eficiente? ¿Cuánto está ganando o perdiendo por cada peso invertido?]
+
+ANALISIS_CONVERSION:
+[Evalúa los clics vs ventas. ¿La conversión es buena o mala para esta categoría? ¿Qué frena la compra después del clic? Qué mejorar en la publicación]
+
+ANALISIS_INVERSION:
+[¿El presupuesto diario es adecuado? ¿Se está limitando la campaña por presupuesto insuficiente o gastando de más en productos sin conversión? ¿Cómo distribuir mejor la inversión?]
+
+PROBLEMAS_DETECTADOS:
+- [problema más grave con impacto cuantificado si es posible]
+- [segundo problema]
+- [tercer problema]
+${acos && parseFloat(acos)>30?'- [problema específico del ACOS alto]':''}
+${ctr && parseFloat(ctr)<0.5?'- [problema específico del CTR bajo]':''}
+
+OPTIMIZACIONES_URGENTES:
+- [acción urgente #1 — mayor impacto en rentabilidad]
+- [acción urgente #2]
+- [acción urgente #3]
+
+ESTRATEGIA_PUJAS:
+[¿Subir, bajar o mantener pujas? ¿En qué productos potenciar y cuáles pausar? ¿Qué estrategia de puja recomiendas (automática vs manual)? Razonamiento basado en los datos]
+
+PROXIMOS_PASOS:
+- [paso concreto para la próxima semana]
+- [paso concreto para el próximo mes]
+- [métrica clave a monitorear]`;
+
+    // Si hay imagen cargada, añadir instrucción para leerla visualmente
+    const promptFinal = adsImageB64
+      ? `IMPORTANTE: Se adjunta una captura de pantalla del tablero de campañas de Mercado Ads. PRIMERO extrae visualmente TODOS los datos que puedas leer en la imagen (impresiones, clics, ACOS, inversión, ventas, CTR, CPC, productos, periodos, etc.) y úsalos como base principal del análisis. Los datos del formulario son complementarios — si la imagen y el formulario difieren, prioriza la imagen.\n\n${prompt}`
+      : prompt;
+
+    const r = adsImageB64
+      ? await callClaudeVision(promptFinal, adsImageB64, 2200)
+      : await callClaude(prompt, 1800);
+    const { sections, bullets } = _auditParse(r);
+
+    const score      = parseInt((sections['SCORE_ACOS']||'0').trim()) || 0;
+    const nivel      = (sections['NIVEL_CAMPANA']||'').trim();
+    const diag       = (sections['DIAGNOSTICO_GENERAL']||'').trim();
+    const analCtr    = (sections['ANALISIS_CTR']||'').trim();
+    const analAcos   = (sections['ANALISIS_ACOS']||'').trim();
+    const analConv   = (sections['ANALISIS_CONVERSION']||'').trim();
+    const analInv    = (sections['ANALISIS_INVERSION']||'').trim();
+    const estrategia = (sections['ESTRATEGIA_PUJAS']||'').trim();
+    const problemas  = bullets['PROBLEMAS_DETECTADOS'] || [];
+    const urgentes   = bullets['OPTIMIZACIONES_URGENTES'] || [];
+    const pasos      = bullets['PROXIMOS_PASOS'] || [];
+
+    const color = score>=75?'var(--green)':score>=50?'var(--gold)':'var(--red)';
+    const nivelEmoji = score>=75?'✅':score>=50?'⚠️':'🚨';
+
+    // Mostrar métricas clave calculadas
+    const metricasHtml = (impresiones||clics||acos||ingresos||inversion) ? `
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">📊 Resumen Métricas</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          ${acos?`<div style="text-align:center;padding:8px;background:var(--bg2);border-radius:8px">
+            <div style="font-size:18px;font-weight:800;color:${parseFloat(acos)<=20?'var(--green)':parseFloat(acos)<=40?'var(--gold)':'var(--red)'}">${acos}%</div>
+            <div style="font-size:9px;color:var(--dim)">ACOS</div></div>`:''}
+          ${ctr?`<div style="text-align:center;padding:8px;background:var(--bg2);border-radius:8px">
+            <div style="font-size:18px;font-weight:800;color:${parseFloat(ctr)>=1?'var(--green)':parseFloat(ctr)>=0.5?'var(--gold)':'var(--red)'}">${ctr}%</div>
+            <div style="font-size:9px;color:var(--dim)">CTR</div></div>`:''}
+          ${roasCalc?`<div style="text-align:center;padding:8px;background:var(--bg2);border-radius:8px">
+            <div style="font-size:18px;font-weight:800;color:${parseFloat(roasCalc)>=3?'var(--green)':parseFloat(roasCalc)>=2?'var(--gold)':'var(--red)'}">${roasCalc}x</div>
+            <div style="font-size:9px;color:var(--dim)">ROAS</div></div>`:''}
+        </div>
+      </div>` : '';
+
+    const diagBlock2 = (title, icon, text, c='var(--accent)') => text ? `
+      <div class="audit-section">
+        <div class="audit-section-title" style="color:${c}">${icon} ${title}</div>
+        <div style="font-size:11px;line-height:1.6;color:var(--text);white-space:pre-wrap">${text}</div>
+      </div>` : '';
+
+    out.innerHTML = `
+      ${metricasHtml}
+      <div class="audit-ring-wrap">
+        <div class="audit-ring" style="--rc:${color};--rp:${score}%;color:${color}">${score}</div>
+        <div class="audit-nivel" style="color:${color}">${nivelEmoji} ${nivel}</div>
+        <div class="audit-veredicto">${diag}</div>
+      </div>
+      ${_auditSection('🚨 Problemas Detectados', 'var(--red)', problemas, '✗')}
+      ${_auditSection('⚡ Optimizaciones Urgentes', 'var(--gold)', urgentes, '→')}
+      ${diagBlock2('Análisis CTR','📈', analCtr)}
+      ${diagBlock2('Análisis ACOS','💸', analAcos, 'var(--gold)')}
+      ${diagBlock2('Análisis Conversión','🎯', analConv)}
+      ${diagBlock2('Análisis Inversión','💰', analInv, 'var(--green)')}
+      ${diagBlock2('Estrategia de Pujas','⚙️', estrategia, '#a78bfa')}
+      ${_auditSection('📅 Próximos Pasos', 'var(--cyan)', pasos, '✓')}
+    `;
+
+    setStatus('ready','✓ Listo');
+    toast('✅ Análisis de campaña completado');
+  } catch(e) {
+    out.innerHTML = `<div style="color:var(--red);padding:16px;font-size:12px">⚠️ ${e.message}</div>`;
+    setStatus('error','Error');
+  }
+}
+document.getElementById('btnGenAds').addEventListener('click', genAds);
+document.getElementById('btnGenAds2').addEventListener('click', genAds);
+
+// ── SPY ───────────────────────────────────────────────────────────────────────
+async function genSpy() {
+  const name = getProduct();
+  const out = document.getElementById('spyOut');
+  out.innerHTML = '<div class="loading"><div class="spin"></div>Analizando psicología del comprador...</div>';
+  setStatus('loading','Analizando...');
+  try {
+    const r = await callClaude(`Eres psicólogo del consumo chileno experto en MercadoLibre Chile.
+PRODUCTO: ${name}
+
+Analiza la psicología del comprador. Mínimo 3 de cada tipo.
+
+Formato EXACTO:
+QUEJA | problema real que frustra al comprador
+QUEJA | otro problema
+QUEJA | otro
+VALOR | qué valoran profundamente
+VALOR | otro valor
+VALOR | otro
+OPORTUNIDAD | cómo capitalizar en tu publicación
+OPORTUNIDAD | otra oportunidad
+OPORTUNIDAD | otra
+KEYWORD | término que buscan pero nadie usa en títulos
+KEYWORD | otro término
+OBJECIÓN | razón por la que NO compran y cómo neutralizarla
+OBJECIÓN | otra objeción`, 700);
+    const icons = {QUEJA:'😤',VALOR:'💚',OPORTUNIDAD:'⚡',KEYWORD:'🔑','OBJECIÓN':'🛡️'};
+    const items = r.split('\n').filter(l=>l.includes('|')).map(line => {
+      const idx = line.indexOf('|');
+      const type = line.substring(0,idx).trim().toUpperCase();
+      const text = line.substring(idx+1).trim();
+      let t = 'OPORTUNIDAD';
+      if(type.includes('QUEJA')) t='QUEJA';
+      else if(type.includes('VALOR')) t='VALOR';
+      else if(type.includes('KEYWORD')) t='KEYWORD';
+      else if(type.includes('OBJECIÓN')||type.includes('OBJECION')) t='OBJECIÓN';
+      return {t,text};
+    });
+    out.innerHTML = items.map(i=>`
+      <div class="spy-item ${i.t}">
+        <div class="spy-type">${icons[i.t]||'•'} ${i.t}</div>
+        <div>${i.text}</div>
+      </div>`).join('');
+    setStatus('ready','✓ Listo');
+    toast('✅ Análisis completado');
+  } catch(e) {
+    out.innerHTML = `<div style="color:var(--red);padding:16px;font-size:12px">⚠️ ${e.message}</div>`;
+    setStatus('error','Error');
+  }
+}
+document.getElementById('btnGenSpy').addEventListener('click', genSpy);
+
+// ── IMÁGENES ──────────────────────────────────────────────────────────────────
+// Build shot grid
+document.getElementById('shotGrid').innerHTML = SHOTS.map(s=>`
+  <button class="shot-btn sel" id="sb-${s.id}">
+    <div class="shot-btn-cat">${s.cat}</div>
+    <div class="shot-btn-name">${s.name}</div>
+  </button>`).join('');
+
+document.getElementById('shotGrid').addEventListener('click', e => {
+  const btn = e.target.closest('.shot-btn');
+  if (!btn) return;
+  const id = btn.id.replace('sb-','');
+  if(selectedShots.has(id)){ selectedShots.delete(id); btn.classList.remove('sel'); }
+  else { selectedShots.add(id); btn.classList.add('sel'); }
+});
+document.getElementById('btnSelAll').addEventListener('click', () => { SHOTS.forEach(s=>{ selectedShots.add(s.id); document.getElementById('sb-'+s.id)?.classList.add('sel'); }); });
+document.getElementById('btnSelNone').addEventListener('click', () => { SHOTS.forEach(s=>{ selectedShots.delete(s.id); document.getElementById('sb-'+s.id)?.classList.remove('sel'); }); });
+document.getElementById('btnSelEss').addEventListener('click', () => {
+  SHOTS.forEach(s=>{ selectedShots.delete(s.id); document.getElementById('sb-'+s.id)?.classList.remove('sel'); });
+  ['hero_white','specs','lifestyle','detail','flatlay','packaging'].forEach(id => {
+    selectedShots.add(id); document.getElementById('sb-'+id)?.classList.add('sel');
+  });
+});
+
+// Upload inicial (zona de drop)
+document.getElementById('imgFile').addEventListener('change', handlePhotoFiles);
+
+// Eliminar foto individual desde el grid
+document.getElementById('photoGrid').addEventListener('click', e => {
+  const btn = e.target.closest('.photo-del');
+  if (!btn) return;
+  const idx = parseInt(btn.dataset.idx);
+  productImages.splice(idx, 1);
+  if (productImages.length === 0) document.getElementById('instantGrid').innerHTML = '';
+  renderPhotoGrid();
+});
+
+// ── UPLOAD CAPTURA CAMPAÑA ADS ────────────────────────────────────────────────
+document.getElementById('adsImgFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    adsImageB64 = ev.target.result;
+    document.getElementById('adsPreviewThumb').src = adsImageB64;
+    document.getElementById('adsPreviewWrap').style.display = 'flex';
+    document.getElementById('adsUploadArea').style.display = 'none';
+  };
+  r.readAsDataURL(f);
+});
+document.getElementById('btnClearAdsImg').addEventListener('click', () => {
+  adsImageB64 = null;
+  document.getElementById('adsImgFile').value = '';
+  document.getElementById('adsPreviewWrap').style.display = 'none';
+  document.getElementById('adsUploadArea').style.display = 'block';
+});
+
+// ── VARIACIONES CON REMOCIÓN DE FONDO IA (sin API key) ───────────────────────
+const INSTANT_VARIANTS = [
+  { id:'fondo_blanco',  name:'Fondo Blanco',   bg:'#ffffff', gradient:null,     shadow:true  },
+  { id:'fondo_gris',    name:'Fondo Gris',     bg:'#f0f0f0', gradient:null,     shadow:true  },
+  { id:'fondo_crema',   name:'Fondo Crema',    bg:'#faf5eb', gradient:null,     shadow:true  },
+  { id:'fondo_azul',    name:'Fondo Azul',     bg:'#e8f4fd', gradient:null,     shadow:false },
+  { id:'fondo_premium', name:'Premium Oscuro', bg:'#1a1a2e', gradient:'radial', shadow:false },
+  { id:'fondo_viola',   name:'Degradado',      bg:'#667eea', gradient:'linear', shadow:false },
+];
+
+function renderCanvasVariant(variant, img, hasAlpha = false) {
+  const size = 800;
+  const c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  const ctx = c.getContext('2d');
+  if (variant.gradient === 'radial') {
+    const g = ctx.createRadialGradient(size/2, size*0.35, 60, size/2, size/2, size*0.72);
+    g.addColorStop(0,'#2d2d5e'); g.addColorStop(1,'#080814');
+    ctx.fillStyle = g;
+  } else if (variant.gradient === 'linear') {
+    const g = ctx.createLinearGradient(0, 0, size, size);
+    g.addColorStop(0,'#667eea'); g.addColorStop(1,'#764ba2');
+    ctx.fillStyle = g;
+  } else {
+    ctx.fillStyle = variant.bg;
+  }
+  ctx.fillRect(0, 0, size, size);
+  if (variant.shadow) {
+    ctx.shadowColor = hasAlpha ? 'rgba(0,0,0,0.28)' : 'rgba(0,0,0,0.12)';
+    ctx.shadowBlur   = hasAlpha ? 45 : 20;
+    ctx.shadowOffsetY = hasAlpha ? 22 : 10;
+  }
+  const maxSz = size * 0.82;
+  const r = Math.min(maxSz / img.naturalWidth, maxSz / img.naturalHeight);
+  const w = img.naturalWidth * r, h = img.naturalHeight * r;
+  ctx.drawImage(img, (size-w)/2, (size-h)/2, w, h);
+  return c.toDataURL('image/png');
+}
+
+// ── REMOCIÓN DE FONDO CANVAS (sin descargas, sin API) ────────────────────────
+function removeBgCanvas(imgEl) {
+  const S = 800;
+  const c = document.createElement('canvas');
+  c.width = S; c.height = S;
+  const ctx = c.getContext('2d');
+
+  // Dibujar imagen centrada
+  const ratio = Math.min(S / imgEl.naturalWidth, S / imgEl.naturalHeight) * 0.84;
+  const w = imgEl.naturalWidth * ratio, h = imgEl.naturalHeight * ratio;
+  ctx.drawImage(imgEl, (S-w)/2, (S-h)/2, w, h);
+
+  const imgData = ctx.getImageData(0, 0, S, S);
+  const d = imgData.data;
+
+  // Detectar color de fondo desde esquinas
+  const cornerSamples = [[0,0],[1,0],[2,0],[S-1,0],[S-2,0],[0,1],[0,2],[S-1,1],[0,S-1],[S-1,S-1],[0,S-2],[S-1,S-2]];
+  let sumR=0, sumG=0, sumB=0, cnt=0;
+  cornerSamples.forEach(([cx,cy]) => {
+    const ci = (cy*S+cx)*4;
+    if (d[ci+3] > 10) { sumR+=d[ci]; sumG+=d[ci+1]; sumB+=d[ci+2]; cnt++; }
+  });
+  const bgR = cnt>0?sumR/cnt:255, bgG=cnt>0?sumG/cnt:255, bgB=cnt>0?sumB/cnt:255;
+
+  const THRESH = 38;
+  const visited = new Uint8Array(S*S);
+  const qX = new Int16Array(S*S), qY = new Int16Array(S*S);
+  let qH=0, qT=0;
+
+  const isBg = (idx) => {
+    const dr=d[idx]-bgR, dg=d[idx+1]-bgG, db=d[idx+2]-bgB;
+    return Math.sqrt(dr*dr+dg*dg+db*db) < THRESH && d[idx+3]>10;
+  };
+  const enq = (x,y) => {
+    if(x<0||y<0||x>=S||y>=S||visited[y*S+x]) return;
+    const idx=(y*S+x)*4;
+    if(isBg(idx)){ visited[y*S+x]=1; qX[qT]=x; qY[qT]=y; qT++; }
+  };
+
+  // Iniciar desde las 4 esquinas
+  [[0,0],[S-1,0],[0,S-1],[S-1,S-1]].forEach(([x,y]) => enq(x,y));
+
+  while(qH < qT) {
+    const cx=qX[qH], cy=qY[qH]; qH++;
+    const idx=(cy*S+cx)*4;
+    // Bordes suaves
+    const dr=d[idx]-bgR, dg=d[idx+1]-bgG, db=d[idx+2]-bgB;
+    const dist = Math.sqrt(dr*dr+dg*dg+db*db);
+    d[idx+3] = dist < THRESH*0.6 ? 0 : Math.round((dist/THRESH)*60);
+    enq(cx+1,cy); enq(cx-1,cy); enq(cx,cy+1); enq(cx,cy-1);
+  }
+
+  ctx.putImageData(imgData,0,0);
+  return c.toDataURL('image/png');
+}
+
+document.getElementById('btnGenInstant').addEventListener('click', () => {
+  const productImageB64 = getPrimaryImage();
+  if (!productImageB64) { toast('⚠️ Primero sube tu foto'); return; }
+  const grid = document.getElementById('instantGrid');
+  const genBtn = document.getElementById('btnGenInstant');
+  genBtn.disabled = true;
+  genBtn.textContent = '⏳ Removiendo fondo...';
+  grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--dim);font-size:11px">
+    <div style="font-size:22px;margin-bottom:6px">✂️</div>
+    <div style="font-weight:700;color:var(--text)">Removiendo fondo...</div>
+  </div>`;
+
+  // Usar setTimeout para que el DOM actualice antes de iniciar el proceso pesado
+  setTimeout(() => {
+    const img = new Image();
+    img.onload = () => {
+      let cleanDataUrl, hasAlpha;
+      try {
+        cleanDataUrl = removeBgCanvas(img);
+        hasAlpha = true;
+      } catch(e) {
+        cleanDataUrl = productImageB64;
+        hasAlpha = false;
+      }
+
+      const cleanImg = new Image();
+      cleanImg.onload = () => {
+        grid.innerHTML = '';
+        INSTANT_VARIANTS.forEach(v => {
+          const dataUrl = renderCanvasVariant(v, cleanImg, hasAlpha);
+          const card = document.createElement('div');
+          card.className = 'instant-card';
+          card.innerHTML = `<img src="${dataUrl}"><div class="instant-lbl"><span>${v.name}</span><button class="instant-dl" title="Descargar" data-url="${dataUrl}" data-name="${v.id}">⬇️</button></div>`;
+          grid.appendChild(card);
+        });
+        toast(hasAlpha ? '✅ Fondo removido — 6 variaciones listas' : '✅ 6 variaciones generadas');
+        genBtn.disabled = false;
+        genBtn.textContent = '✂️ Remover fondo + 6 variaciones';
+      };
+      cleanImg.src = cleanDataUrl;
+    };
+    img.src = productImageB64;
+  }, 50);
+});
+
+document.getElementById('instantGrid').addEventListener('click', e => {
+  const btn = e.target.closest('.instant-dl');
+  if (!btn) return;
+  const a = document.createElement('a');
+  a.href = btn.dataset.url; a.download = `meli-${btn.dataset.name}.png`; a.click();
+});
+
+// Banner: ocultar siempre (ahora HuggingFace es gratis)
+function checkImageKeys() {
+  const banner = document.getElementById('noKeyBanner');
+  if (!banner) return;
+  if (!KEYS.openai && !KEYS.gemini && !KEYS.together) {
+    // Sin ninguna key
+    banner.style.display = 'block';
+    banner.innerHTML = `<div style="background:rgba(246,173,85,.08);border:1px solid rgba(246,173,85,.25);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:11px">
+      <div style="font-weight:700;color:var(--gold);margin-bottom:4px">🔑 Necesitás una API Key para generar imágenes</div>
+      <div style="color:var(--dim);line-height:1.6">
+        <b style="color:var(--text)">Opción A — OpenAI DALL-E 3 (mejor calidad):</b> <b style="color:var(--cyan);cursor:pointer" onclick="window.open('https://platform.openai.com/api-keys','_blank')">platform.openai.com/api-keys</b> → pegala en ⚙️<br>
+        <b style="color:var(--text)">Opción B — Gemini (gratis):</b> <b style="color:var(--cyan);cursor:pointer" onclick="window.open('https://aistudio.google.com/apikey','_blank')">aistudio.google.com/apikey</b> → pegala en ⚙️<br>
+        <b style="color:var(--text)">Opción C — Together AI ($):</b> <b style="color:var(--cyan);cursor:pointer" onclick="window.open('https://api.together.ai','_blank')">api.together.ai</b> → pegala en ⚙️
+      </div>
+    </div>`;
+  } else if (!KEYS.gemini && KEYS.together) {
+    // Solo Together AI — recomendar Gemini para img2img
+    banner.style.display = 'block';
+    banner.innerHTML = `<div style="background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px">
+      <div style="font-weight:700;color:var(--cyan);margin-bottom:3px">💡 Tip: agrega Gemini para generar desde TU foto</div>
+      <div style="color:var(--dim);line-height:1.5">
+        Con <b style="color:var(--text)">Together AI</b> generás desde el nombre del producto.<br>
+        Con <b style="color:var(--text)">Gemini + tu foto</b> generás variaciones de tu producto REAL (mismo diseño).<br>
+        <b style="color:var(--cyan);cursor:pointer" onclick="window.open('https://aistudio.google.com/apikey','_blank')">Obtener Gemini Key gratis →</b> (2 min, sin tarjeta)
+      </div>
+    </div>`;
+  } else if (KEYS.openai && !KEYS.gemini) {
+    // Tiene DALL-E 3 pero no Gemini — mostrar tip de consistencia con foto
+    banner.style.display = 'block';
+    banner.innerHTML = `<div style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px">
+      <div style="font-weight:700;color:var(--green);margin-bottom:3px">🟢 DALL-E 3 activo — máxima calidad de texto</div>
+      <div style="color:var(--dim);line-height:1.55">
+        <b style="color:var(--text)">Para imágenes 100% consistentes:</b> sube tu foto del producto + agrega Gemini Key (img-to-img).<br>
+        <b style="color:var(--text)">Para fotos 03 y 04b con características:</b> genera primero la descripción del producto o completa el campo "Detalles visuales".<br>
+        <b style="color:var(--cyan);cursor:pointer" onclick="window.open('https://aistudio.google.com/apikey','_blank')">Obtener Gemini Key gratis →</b>
+      </div>
+    </div>`;
+  } else {
+    banner.style.display = 'none';
+    banner.innerHTML = '';
+  }
+}
+checkImageKeys();
+
+// ── CANVAS OVERLAY — Características (texto 100% controlado, sin depender del modelo IA) ────
+
+function extractCharacteristics(max = 5) {
+  // 1. Intentar desde la descripción generada (múltiples patrones de sección)
+  const descEl = document.getElementById('descOut');
+  const desc = descEl ? descEl.textContent.trim() : '';
+  if (desc && desc.length > 80 && !desc.includes('aparecerá aquí') && !desc.includes('Generando')) {
+    const patterns = [
+      /CARACTER[IÍ]STICAS PRINCIPALES([\s\S]*?)(?:-{4,}|ESPECIFICACIONES|CONTENIDO|BENEFICIOS|QUÉ INCLUYE|$)/i,
+      /CARACTER[IÍ]STICAS([\s\S]*?)(?:-{4,}|ESPECIFICACIONES|CONTENIDO|BENEFICIOS|QUÉ INCLUYE|$)/i,
+      /ESPECIFICACIONES T[EÉ]CNICAS([\s\S]*?)(?:-{4,}|CARACTER|CONTENIDO|$)/i,
+      /ESPECIFICACIONES([\s\S]*?)(?:-{4,}|CARACTER|CONTENIDO|BENEFICIOS|$)/i,
+      /BENEFICIOS CLAVE([\s\S]*?)(?:-{4,}|CARACTER|ESPECIF|CONTENIDO|$)/i,
+      /BENEFICIOS([\s\S]*?)(?:-{4,}|CARACTER|ESPECIF|CONTENIDO|$)/i,
+    ];
+    for (const pat of patterns) {
+      const m = desc.match(pat);
+      if (m) {
+        const lines = m[1].split('\n')
+          .map(l => l.replace(/^[-•*·✓✅🔹🔸▸▶]\s*/, '').replace(/^\d+[.)]\s*/, '').trim())
+          .filter(l => l.length > 8 && l.length < 130 && !l.match(/^(CARACTER|ESPEC|BENEF)/i));
+        if (lines.length >= 2) return lines.slice(0, max);
+      }
+    }
+    // Fallback: buscar líneas con bullets de cualquier parte del texto
+    const allBullets = desc.split('\n')
+      .map(l => l.replace(/^[-•*·✓✅🔹🔸▸▶]\s*/, '').trim())
+      .filter(l => l.length > 12 && l.length < 100 && !l.match(/^[A-ZÁÉÍÓÚ]{4,}/));
+    if (allBullets.length >= 3) return allBullets.slice(0, max);
+  }
+
+  // 2. Fallback: usar productImageNotes si existen (parseados como características)
+  if (productImageNotes && productImageNotes.trim().length > 10) {
+    const lines = productImageNotes.trim()
+      .split(/[,\n]+/)
+      .map(l => l.replace(/^[-•*·]\s*/, '').trim())
+      .filter(l => l.length > 5 && l.length < 100);
+    if (lines.length >= 2) return lines.slice(0, max);
+  }
+
+  return null;
+}
+
+function _rrect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+function _wrap(ctx, text, x, y, maxW, lh, maxLines=2) {
+  const words = text.split(' ');
+  let line = '', row = 0;
+  for (const w of words) {
+    const test = line ? line+' '+w : w;
+    if (ctx.measureText(test).width > maxW && line) {
+      ctx.fillText(line, x, y + row*lh);
+      row++; if (row >= maxLines) return;
+      line = w;
+    } else line = test;
+  }
+  if (line) ctx.fillText(line, x, y + row*lh);
+}
+
+async function applySpecsOverlay(imgUrl, style) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const S = 1024;
+      const c = document.createElement('canvas');
+      c.width = S; c.height = S;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, S, S);
+      const FONT = '-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif';
+      const BLUE = '#2563eb', DARK = '#1e293b';
+
+      if (style === 'before-after') {
+        // Línea divisoria sutil al centro
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.38)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([10, 8]);
+        ctx.beginPath(); ctx.moveTo(S/2, 0); ctx.lineTo(S/2, S); ctx.stroke();
+        ctx.setLineDash([]); ctx.restore();
+
+        const bH     = Math.round(S * 0.046);  // altura — compacto
+        const bY     = Math.round(S * 0.028);  // y desde arriba
+        const fSize  = Math.round(S * 0.026);  // fuente pequeña y elegante
+        const rad    = Math.round(bH * 0.32);  // esquinas suaves
+        const margin = Math.round(S * 0.028);  // margen del borde
+        const accW   = 4;                       // barra de acento izquierda
+
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `600 ${fSize}px ${FONT}`;
+        try { ctx.letterSpacing = '2px'; } catch(e){}
+
+        // --- Badge ANTES (mitad izquierda) ---
+        const wAntes = Math.round(S * 0.150);
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        _rrect(ctx, margin, bY, wAntes, bH, rad); ctx.fill();
+        ctx.fillStyle = '#94a3b8';  // acento slate
+        _rrect(ctx, margin, bY, accW, bH, rad); ctx.fill();
+        ctx.fillStyle = '#334155';
+        ctx.fillText('ANTES', margin + wAntes / 2 + accW / 2, bY + bH / 2);
+
+        // --- Badge DESPUÉS (mitad derecha) ---
+        const wDespues = Math.round(S * 0.195);
+        const dX = S / 2 + margin;
+        ctx.fillStyle = 'rgba(37,99,235,0.90)';
+        _rrect(ctx, dX, bY, wDespues, bH, rad); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.30)';
+        _rrect(ctx, dX, bY, accW, bH, rad); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.fillText('DESPUÉS', dX + wDespues / 2 + accW / 2, bY + bH / 2);
+
+        try { ctx.letterSpacing = '0px'; } catch(e){}
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'alphabetic';
+
+      } else {
+        // Para specs y lifestyle-specs se necesitan características
+        const chars = extractCharacteristics(5);
+        if (!chars || chars.length < 2) { resolve(imgUrl); return; }
+
+      if (style === 'specs') {
+        // Panel INFERIOR con gradiente — nunca tapa el producto
+        const panelH = Math.round(S * .40);
+        const panelY = S - panelH;
+        // Gradiente: transparente arriba → blanco sólido abajo
+        const grad = ctx.createLinearGradient(0, panelY, 0, S);
+        grad.addColorStop(0,   'rgba(255,255,255,0)');
+        grad.addColorStop(0.2, 'rgba(255,255,255,0.97)');
+        grad.addColorStop(1,   'rgba(255,255,255,1)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, panelY, S, panelH);
+
+        // Título + línea
+        const tY = panelY + Math.round(panelH * 0.18);
+        ctx.fillStyle = DARK;
+        ctx.font = `700 ${Math.round(S*.022)}px ${FONT}`;
+        ctx.fillText('CARACTERÍSTICAS', 30, tY);
+        ctx.fillStyle = BLUE;
+        ctx.fillRect(30, tY+7, Math.round(S*.17), 3);
+
+        // Items en 2 columnas (máx 5)
+        const colW = S / 2;
+        const startY = tY + 30;
+        const rowH = Math.round(panelH * 0.22);
+        chars.slice(0,5).forEach((line, i) => {
+          const col = i % 2, row = Math.floor(i / 2);
+          const lx = 24 + col * colW;
+          const ly = startY + row * rowH;
+          // Círculo numerado
+          ctx.fillStyle = BLUE;
+          _rrect(ctx, lx, ly-13, 20, 20, 10); ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.font = `700 ${Math.round(S*.014)}px ${FONT}`;
+          ctx.textAlign = 'center';
+          ctx.fillText(String(i+1), lx+10, ly+1);
+          ctx.textAlign = 'left';
+          // Texto
+          ctx.fillStyle = DARK;
+          ctx.font = `${Math.round(S*.017)}px ${FONT}`;
+          _wrap(ctx, line, lx+26, ly, colW-50, Math.round(S*.021), 2);
+        });
+
+      } else if (style === 'lifestyle-specs') {
+        // Banner inferior con degradado — empieza en 65% para más espacio
+        const by = Math.round(S * .65), bh = S - by;
+        // Gradiente suave
+        const grad = ctx.createLinearGradient(0, by, 0, S);
+        grad.addColorStop(0,    'rgba(255,255,255,0)');
+        grad.addColorStop(0.18, 'rgba(255,255,255,0.95)');
+        grad.addColorStop(1,    'rgba(255,255,255,1)');
+        ctx.fillStyle = grad; ctx.fillRect(0, by, S, bh);
+
+        // Título
+        const tY = by + Math.round(bh * 0.22);
+        ctx.fillStyle=DARK; ctx.font=`700 ${Math.round(S*.02)}px ${FONT}`;
+        ctx.fillText('CARACTERÍSTICAS PRINCIPALES', 26, tY);
+        ctx.fillStyle=BLUE; ctx.fillRect(26, tY+6, Math.round(S*.20), 2);
+
+        // 2 columnas, máx 4 items
+        const show=chars.slice(0,4), colW=S/2;
+        show.forEach((line,i) => {
+          const col=i%2, row=Math.floor(i/2);
+          const lx=22+col*colW, ly=tY+28+row*Math.round(S*.108);
+          ctx.fillStyle=BLUE; ctx.beginPath(); ctx.arc(lx+7,ly-3,4,0,Math.PI*2); ctx.fill();
+          ctx.fillStyle=DARK; ctx.font=`${Math.round(S*.017)}px ${FONT}`;
+          _wrap(ctx, line, lx+20, ly, colW-44, Math.round(S*.022), 2);
+        });
+      }
+      } // cierre del else (specs / lifestyle-specs)
+      resolve(c.toDataURL('image/png'));
+    };
+    img.onerror = () => resolve(imgUrl);
+    img.src = imgUrl;
+  });
+}
+
+// Traduce el nombre del producto al inglés usando Claude (para mejores prompts de imagen)
+async function translateProductForImage(name) {
+  if (!localStorage.getItem('sm_lic_key')) return name; // sin licencia, usar nombre directo
+  try {
+    const r = await callClaude(
+      `You are helping generate product images for an e-commerce listing.
+Translate this Spanish product name into a concise, descriptive English phrase suitable for AI image generation (max 20 words).
+Focus on what the product IS visually — materials, shape, color if known, quantity if relevant.
+Product name: "${name}"
+Reply with ONLY the English description, nothing else.`, 300
+    );
+    return r.trim().replace(/^["']|["']$/g,'') || name;
+  } catch(e) { return name; }
+}
+
+document.getElementById('btnGenImgs').addEventListener('click', async () => {
+  const name = document.getElementById('productInput').value.trim();
+  if(!name){ toast('⚠️ Escribe el nombre del producto'); return; }
+  if(selectedShots.size===0){ toast('⚠️ Selecciona al menos un tipo'); return; }
+
+  const btn = document.getElementById('btnGenImgs');
+  const prog = document.getElementById('imgProg');
+  const out = document.getElementById('imgsOut');
+  const primaryImg = getPrimaryImage();
+  const provider = (primaryImg && KEYS.gemini)
+    ? `🤖 Gemini + ${productImages.length > 1 ? productImages.length + ' fotos' : 'tu foto'}`
+    : KEYS.openai ? '🟢 DALL-E 3'
+    : KEYS.together ? '🎨 Together AI'
+    : '🤖 IA';
+  btn.disabled = true; btn.innerHTML = `<div class="spin"></div> Preparando...`;
+  prog.classList.add('show'); out.innerHTML = '';
+
+  // Traducir nombre del producto para mejores prompts de imagen
+  const productNameEN = await translateProductForImage(name);
+  if (productNameEN !== name) console.log(`[SpaceMELI] Producto traducido: "${name}" → "${productNameEN}"`);
+
+  btn.innerHTML = `<div class="spin"></div> Generando con ${provider}...`;
+
+  const sel = SHOTS.filter(s=>selectedShots.has(s.id));
+
+  // Aviso si se generan shots con overlay de características sin descripción previa
+  const needsChars = sel.some(s => s.overlay === 'specs' || s.overlay === 'lifestyle-specs');
+  const descEl2 = document.getElementById('descOut');
+  const descExists = descEl2 && descEl2.textContent.trim().length > 80
+                     && !descEl2.textContent.includes('aparecerá aquí');
+  const notesExist = productImageNotes && productImageNotes.trim().length > 10;
+  if (needsChars && !descExists && !notesExist) {
+    toast('💡 Tip: genera la descripción primero o agrega detalles visuales para que las fotos 03 y 04b muestren características', 5000);
+  }
+
+  sel.forEach(s => {
+    out.innerHTML += `<div class="img-card" id="ic-${s.id}">
+      <div class="img-card-loading"><div class="spin"></div><div>${s.name}</div></div>
+    </div>`;
+  });
+
+  const dims = getDimsText();
+  for(let i=0; i<sel.length; i++){
+    const shot = sel[i];
+    document.getElementById('imgProgText').textContent = `${i+1}/${sel.length} — ${shot.name}`;
+    document.getElementById('progBar').style.width = Math.round(i/sel.length*100)+'%';
+    // Extraer descripción del producto para nutrir el prompt de imagen
+    const descEl = document.getElementById('descOut');
+    const descText = descEl ? descEl.textContent.trim().slice(0,300).replace(/\s+/g,' ') : '';
+    const productDesc = descText && descText.length > 30 && !descText.includes('aparecerá aquí') ? descText : '';
+    const notesExtra = productImageNotes.trim() ? ` Visual details: ${productImageNotes.trim().slice(0,200)}` : '';
+    const prompt = shot.prompt(productNameEN, productDesc) + (dims ? `. Dimensiones: ${dims}` : '') + notesExtra;
+    let url = null, attempts=2, delay=3000, lastErrMsg='';
+    while(attempts>0 && !url){
+      try { url = await callImageAI(prompt, primaryImg); }
+      catch(e){ lastErrMsg=e.message; attempts--; if(attempts>0) await new Promise(r=>setTimeout(r,delay)); delay=Math.min(delay*2,10000); }
+    }
+    // Aplicar overlay de características (canvas, 100% español, sin depender del modelo IA)
+    let overlaySkipped = false;
+    if (url && shot.overlay) {
+      const urlBefore = url;
+      try { url = await applySpecsOverlay(url, shot.overlay); }
+      catch(e) { console.warn('[SpaceMELI] Overlay skip:', e.message); }
+      // Si applySpecsOverlay devolvió la misma URL (sin características disponibles)
+      if (url === urlBefore && (shot.overlay === 'specs' || shot.overlay === 'lifestyle-specs')) {
+        overlaySkipped = true;
+      }
+    }
+    const card = document.getElementById('ic-'+shot.id);
+    if(card){
+      if(url) {
+        const skipBadge = overlaySkipped
+          ? `<div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.55);color:#fff;font-size:9px;padding:3px 7px;border-radius:20px;backdrop-filter:blur(4px)">💡 Sin características — agrega descripción o detalles visuales</div>`
+          : '';
+        card.innerHTML = `<div style="position:relative">${skipBadge}<img src="${url}" alt="${shot.name}"></div><div class="img-card-info"><div class="img-card-label">${shot.name}</div><button class="img-card-dl" data-url="${url}" data-name="${shot.id}">⬇️</button></div>`;
+      } else {
+        card.innerHTML = `<div class="img-card-loading" style="color:var(--red);font-size:10px;padding:8px">❌ ${lastErrMsg.slice(0,80)}</div>`;
+      }
+    }
+    if(i<sel.length-1) await new Promise(r=>setTimeout(r,1000));
+  }
+  document.getElementById('imgProgText').textContent = '✅ ¡Set completo!';
+  document.getElementById('progBar').style.width = '100%';
+  btn.disabled=false; btn.innerHTML='🚀 Generar imágenes con IA';
+  toast('✅ Imágenes generadas');
+});
+
+document.getElementById('imgsOut').addEventListener('click', e => {
+  const btn = e.target.closest('.img-card-dl');
+  if(!btn) return;
+  const a = document.createElement('a');
+  a.href = btn.dataset.url; a.download = `space-meli-${btn.dataset.name}.png`; a.click();
+});
+
+// ── BRAND ─────────────────────────────────────────────────────────────────────
+document.getElementById('btnGenBrand').addEventListener('click', async () => {
+  const wrap = document.getElementById('brandOutWrap');
+  const out = document.getElementById('brandOut');
+  wrap.style.display='block'; out.textContent='Creando manual de marca...';
+  setStatus('loading','Generando...');
+  try {
+    const r = await callClaude(`Eres el mejor consultor de marca para vendedores en MercadoLibre Chile.
+TIENDA: ${document.getElementById('brandName').value||'Mi Tienda'}
+CATEGORÍA: ${document.getElementById('brandCat').value||'General'}
+PRODUCTOS: ${document.getElementById('brandProducts').value||'Varios productos'}
+PÚBLICO: ${document.getElementById('brandAudience').value||'Compradores chilenos'}
+PERSONALIDAD: ${document.getElementById('brandVibe').value||'Profesional y confiable'}
+
+Crea un MANUAL DE MARCA COMPLETO con estas secciones:
+🏷️ NOMBRE ESTRATÉGICO — alternativas y recomendación
+🎨 PALETA DE COLORES — 4 colores con hex y psicología
+✍️ TIPOGRAFÍA — fuentes Google Fonts recomendadas
+🗣️ VOZ Y TONO — personalidad, tono, frases que NO usar
+🏆 PROPUESTA DE VALOR ÚNICA — 1 frase poderosa
+📣 TAGLINES — 3 lemas (emocional, funcional, confianza)
+⭐ ESTRATEGIA DE REPUTACIÓN — 5 acciones para llegar a MercadoLíder`, 2000);
+    out.textContent = r;
+    setStatus('ready','✓ Listo');
+    toast('✅ Manual de marca creado');
+  } catch(e) { out.textContent='⚠️ '+e.message; setStatus('error','Error'); }
+});
+document.getElementById('btnCopyBrand').addEventListener('click', () => copyText(document.getElementById('brandOut').textContent));
+
+// ── PRECIO ────────────────────────────────────────────────────────────────────
+// ── CALCULADORA COMPLETA ──────────────────────────────────────────────────────
+const FULL_FEES = [
+  {max:200,fee:790},{max:500,fee:990},{max:1000,fee:1290},{max:2000,fee:1590},
+  {max:5000,fee:1990},{max:10000,fee:2490},{max:20000,fee:3490},{max:Infinity,fee:4990}
+];
+function getFULLFee(g){ return (FULL_FEES.find(e=>g<=e.max)||FULL_FEES.at(-1)).fee; }
+function clp(n){ return '$'+Math.round(n).toLocaleString('es-CL'); }
+
+let shipMode = 'full';
+document.querySelectorAll('.ship-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.ship-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    shipMode = tab.dataset.ship;
+    document.getElementById('shipFullSection').style.display   = shipMode==='full'   ? 'block':'none';
+    document.getElementById('shipPropioSection').style.display = shipMode==='propio' ? 'block':'none';
+  });
+});
+
+document.getElementById('priceWeight').addEventListener('input', () => {
+  const g = parseFloat(document.getElementById('priceWeight').value)||0;
+  const hint = document.getElementById('fullFeeHint');
+  if(g>0){
+    hint.textContent = `📦 Tarifa FULL estimada: ${clp(getFULLFee(g))} CLP`;
+    hint.style.color = 'var(--gold)';
+  } else {
+    hint.textContent = 'Ingresá el peso → calcula tarifa FULL automáticamente';
+    hint.style.color = '';
+  }
+});
+
+document.getElementById('btnCalcPrice').addEventListener('click', async () => {
+  const cost  = parseFloat(document.getElementById('priceCost').value)  || 0;
+  const sell  = parseFloat(document.getElementById('priceSell').value)  || 0;
+  const pack  = parseFloat(document.getElementById('pricePack').value)  || 0;
+  const other = parseFloat(document.getElementById('priceOther').value) || 0;
+  if(!sell){ toast('⚠️ Ingresa el precio de venta'); return; }
+
+  let shipCost=0, shipLabel='';
+  if(shipMode==='full'){
+    const g = parseFloat(document.getElementById('priceWeight').value)||0;
+    shipCost  = g>0 ? getFULLFee(g) : 0;
+    shipLabel = g>0 ? `FULL ${g}g → ${clp(shipCost)}` : 'FULL (sin peso ingresado → $0)';
+  } else if(shipMode==='propio'){
+    shipCost  = parseFloat(document.getElementById('priceShipCost').value)||0;
+    shipLabel = `Envío propio → ${clp(shipCost)}`;
+  } else {
+    shipLabel = 'Lo paga el comprador → $0';
+  }
+
+  const comClas = sell * 0.165;
+  const comPrem = sell * 0.201;
+  const fixedCosts = cost + pack + other + shipCost;
+  const netClas = sell - comClas - fixedCosts;
+  const netPrem = sell - comPrem - fixedCosts;
+  const mClas   = ((netClas/sell)*100).toFixed(1);
+  const mPrem   = ((netPrem/sell)*100).toFixed(1);
+  const roiClas = cost>0 ? ((netClas/cost)*100).toFixed(0)+'%' : '—';
+  const roiPrem = cost>0 ? ((netPrem/cost)*100).toFixed(0)+'%' : '—';
+  const bevenClas = fixedCosts>0 ? Math.ceil(fixedCosts/(1-0.165)) : '—';
+  const bevenPrem = fixedCosts>0 ? Math.ceil(fixedCosts/(1-0.201)) : '—';
+
+  const cc = v => v>=0 ? 'ct-pos' : 'ct-neg';
+  const mc = v => parseFloat(v)>=0 ? 'ct-pos' : 'ct-neg';
+
+  const bd = document.getElementById('priceBreakdown');
+  bd.style.display = 'block';
+  bd.innerHTML = `
+  <table class="cost-table">
+    <thead><tr><th></th><th>📋 CLÁSICO</th><th>⭐ PREMIUM</th></tr></thead>
+    <tbody>
+      <tr><td>Precio de venta</td><td>${clp(sell)}</td><td>${clp(sell)}</td></tr>
+      <tr><td>Comisión MELI <span class="ct-dim">(16.5% / 20.1%)</span></td>
+          <td class="ct-neg">-${clp(comClas)}</td><td class="ct-neg">-${clp(comPrem)}</td></tr>
+      <tr><td>Envío <span class="ct-dim">(${shipMode==='full'?'FULL':shipMode==='propio'?'Propio':'Comprador paga'})</span></td>
+          <td class="${shipCost>0?'ct-neg':'ct-dim'}">${shipCost>0?'-'+clp(shipCost):'$0'}</td>
+          <td class="${shipCost>0?'ct-neg':'ct-dim'}">${shipCost>0?'-'+clp(shipCost):'$0'}</td></tr>
+      ${pack>0?`<tr><td>Embalaje/Packaging</td><td class="ct-neg">-${clp(pack)}</td><td class="ct-neg">-${clp(pack)}</td></tr>`:''}
+      ${other>0?`<tr><td>Otros costos</td><td class="ct-neg">-${clp(other)}</td><td class="ct-neg">-${clp(other)}</td></tr>`:''}
+      ${cost>0?`<tr><td>Costo del producto</td><td class="ct-neg">-${clp(cost)}</td><td class="ct-neg">-${clp(cost)}</td></tr>`:''}
+      <tr class="row-total">
+        <td>🏆 GANANCIA NETA</td>
+        <td class="${cc(netClas)}">${clp(netClas)}</td>
+        <td class="${cc(netPrem)}">${clp(netPrem)}</td>
+      </tr>
+      <tr><td>Margen sobre venta</td>
+          <td class="${mc(mClas)}">${mClas}%</td>
+          <td class="${mc(mPrem)}">${mPrem}%</td></tr>
+      ${cost>0?`<tr><td>ROI (retorno inversión)</td><td class="${mc(mClas)}">${roiClas}</td><td class="${mc(mPrem)}">${roiPrem}</td></tr>`:''}
+      ${fixedCosts>0?`<tr><td>Precio mínimo rentable</td><td class="ct-dim">${typeof bevenClas==='number'?clp(bevenClas):'—'}</td><td class="ct-dim">${typeof bevenPrem==='number'?clp(bevenPrem):'—'}</td></tr>`:''}
+    </tbody>
+  </table>
+  <div style="font-size:9px;color:var(--muted);margin-top:2px">
+    Comisiones MELI Chile: Clásico 16.5% · Premium 20.1% · ${shipLabel}
+  </div>`;
+
+  const out = document.getElementById('priceOut');
+  out.style.display='block'; out.textContent='Analizando con IA de ventas...';
+  setStatus('loading','Calculando...');
+  try {
+    const name = document.getElementById('productInput').value.trim()||'Producto';
+    const r = await callClaude(`Eres el mejor asesor financiero-comercial para vendedores de MercadoLibre Chile.
+
+PRODUCTO: ${name}
+PRECIO VENTA: ${clp(sell)}
+COSTO PRODUCTO: ${cost>0?clp(cost):'no indicado'}
+ENVÍO: ${shipLabel}
+EMBALAJE: ${clp(pack)}  |  OTROS: ${clp(other)}
+
+CLÁSICO 16.5% → Ganancia ${clp(netClas)} · Margen ${mClas}% · ROI ${roiClas}
+PREMIUM 20.1% → Ganancia ${clp(netPrem)} · Margen ${mPrem}% · ROI ${roiPrem}
+${fixedCosts>0?`Precio mínimo rentable → Clásico: ${clp(bevenClas)} · Premium: ${clp(bevenPrem)}`:''}
+
+Responde con ojo de vendedor chileno experto en 5 puntos:
+1. ¿ES BUEN NEGOCIO? (sé brutal y directo — sin palabrerío)
+2. ¿CLÁSICO o PREMIUM? — ¿cuál conviene para este producto y por qué?
+3. PRECIO ÓPTIMO SUGERIDO — cuánto cobrar para maximizar ventas sin perder margen
+4. CONSEJO PARA ESCALAR — cómo bajar costos o aumentar ticket promedio
+5. ⚠️ ALERTA — si hay algo peligroso, márgenes bajos o riesgo real
+
+Formato: bullets cortos, tono chileno directo, sin relleno.`, 650);
+    out.textContent=r; setStatus('ready','✓ Listo');
+    toast('✅ Análisis completo listo');
+  } catch(e){ out.textContent='⚠️ '+e.message; setStatus('error','Error'); }
+});
+
+// ── RESPONDER ─────────────────────────────────────────────────────────────────
+document.getElementById('btnGenAnswer').addEventListener('click', async () => {
+  const q = document.getElementById('answerQ').value.trim();
+  if(!q){ toast('⚠️ Escribe la pregunta'); return; }
+  const wrap = document.getElementById('answerOutWrap');
+  const out = document.getElementById('answerOut');
+  wrap.style.display='block'; out.textContent='Generando respuesta perfecta...';
+  setStatus('loading','Generando...');
+  try {
+    const name = document.getElementById('productInput').value.trim()||'el producto';
+    const r = await callClaude(`Eres vendedor experto en MercadoLibre Chile.
+PRODUCTO: ${name}
+PREGUNTA DEL COMPRADOR: "${q}"
+
+Escribe la respuesta perfecta:
+- Directa y honesta
+- Genera confianza y empuja a comprar
+- Máximo 3 párrafos cortos
+- Tono chileno, cercano
+- Si hay objeción, neutralízala elegantemente
+- Termina invitando a comprar
+
+Solo la respuesta, sin comentarios extra.`, 400);
+    out.textContent=r; setStatus('ready','✓ Listo');
+    toast('✅ Respuesta generada');
+  } catch(e){ out.textContent='⚠️ '+e.message; setStatus('error','Error'); }
+});
+document.getElementById('btnCopyAnswer').addEventListener('click', () => copyText(document.getElementById('answerOut').textContent));
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function copyText(t){
+  navigator.clipboard.writeText(t).then(()=>toast('✓ Copiado'));
+}
+function toast(msg, duration=2200){
+  const el = document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), duration);
+}
+
+// ── LICENSE GATE ──────────────────────────────────────────────────────────────
+// URL del endpoint de validación — en producción Vercel es '/api/validate'
+// En local puedes poner 'http://localhost:3000/api/validate' si corres el servidor
+const VALIDATE_URL = '/api/validate';
+// URL de tu Stripe Checkout — reemplazar con el link real al crear el producto
+const STRIPE_URL   = 'https://buy.stripe.com/14AeVe89obdv1Lv8T3gIo05';
+// Cuántas horas cachear la validación sin volver a llamar a la API
+const CACHE_HOURS  = 12;
+
+function _licenseGate() {
+  // ── Verificar caché local ──────────────────────────────────────────────────
+  const cached = (() => {
+    try {
+      const k = localStorage.getItem('sm_lic_key');
+      const t = parseInt(localStorage.getItem('sm_lic_ts') || '0', 10);
+      const ok = localStorage.getItem('sm_lic_ok') === '1';
+      if (k && ok && Date.now() - t < CACHE_HOURS * 3600 * 1000) return k;
+    } catch(e) {}
+    return null;
+  })();
+
+  if (cached) { _unlockApp(cached); return; }
+
+  // ── Mostrar pantalla de licencia ───────────────────────────────────────────
+  const gate = document.getElementById('licenseGate');
+  gate.style.display = 'flex';
+
+  const btn  = document.getElementById('lgBtn');
+  const inp  = document.getElementById('lgInput');
+  const err  = document.getElementById('lgErr');
+  const spin = document.getElementById('lgSpin');
+
+  btn.addEventListener('click', _validateKey);
+  inp.addEventListener('keydown', e => { if(e.key==='Enter') _validateKey(); });
+
+  async function _validateKey() {
+    const key = inp.value.trim().toUpperCase();
+    if (!key) { err.textContent = 'Ingresá tu código de acceso'; err.style.display='block'; return; }
+    err.style.display = 'none';
+    btn.disabled = true;
+    spin.style.display = 'inline-block';
+    btn.querySelector('.lg-btn-text').textContent = 'Verificando...';
+
+    try {
+      const res = await fetch(VALIDATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key })
+      });
+      const data = await res.json();
+
+      if (data.valid) {
+        // Guardar en caché
+        localStorage.setItem('sm_lic_key', key);
+        localStorage.setItem('sm_lic_ok',  '1');
+        localStorage.setItem('sm_lic_ts',  String(Date.now()));
+        if (data.email) localStorage.setItem('sm_lic_email', data.email);
+        // Animación de éxito y desbloqueo
+        gate.style.transition = 'opacity .4s ease';
+        gate.style.opacity = '0';
+        setTimeout(() => { gate.style.display='none'; _unlockApp(key); }, 420);
+      } else {
+        const msgs = {
+          'License deactivated': '⛔ Tu licencia fue desactivada. Contactá soporte.',
+          'License expired':     '📅 Tu licencia venció. Renovala en el link de abajo.',
+          'Key not found':       '❌ Código no encontrado. Revisalo o comprá acceso.'
+        };
+        err.textContent = msgs[data.error] || (data.error || '❌ Código inválido');
+        err.style.display = 'block';
+        btn.disabled = false;
+        spin.style.display = 'none';
+        btn.querySelector('.lg-btn-text').textContent = 'Activar acceso';
+        inp.select();
+      }
+    } catch(e) {
+      // Si la API no está disponible (desarrollo local sin servidor), modo dev
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        const devBypass = inp.value.trim().toUpperCase();
+        if (devBypass.startsWith('SM-') && devBypass.length >= 10) {
+          localStorage.setItem('sm_lic_key', devBypass);
+          localStorage.setItem('sm_lic_ok',  '1');
+          localStorage.setItem('sm_lic_ts',  String(Date.now()));
+          gate.style.display = 'none';
+          _unlockApp(devBypass);
+          return;
+        }
+      }
+      err.textContent = '⚠️ Error de conexión. Verificá tu internet e intentá de nuevo.';
+      err.style.display = 'block';
+      btn.disabled = false;
+      spin.style.display = 'none';
+      btn.querySelector('.lg-btn-text').textContent = 'Activar acceso';
+    }
+  }
+}
+
+function _unlockApp(key) {
+  document.getElementById('appRoot').style.display = 'flex';
+  // Mostrar email del usuario en el sidebar si está guardado
+  const email = localStorage.getItem('sm_lic_email');
+  if (email) {
+    const slot = document.getElementById('licUserSlot');
+    if (slot) slot.textContent = email;
+  }
+  // Botón cerrar sesión
+  const logoutBtn = document.getElementById('btnLogout');
+  if (logoutBtn) {
+    logoutBtn.style.display = 'flex';
+    logoutBtn.addEventListener('click', () => {
+      if (!confirm('¿Cerrar sesión? Necesitarás ingresar tu código nuevamente.')) return;
+      localStorage.removeItem('sm_lic_key');
+      localStorage.removeItem('sm_lic_ok');
+      localStorage.removeItem('sm_lic_ts');
+      localStorage.removeItem('sm_lic_email');
+      location.reload();
+    });
+  }
+}
+
+// Iniciar verificación de licencia al cargar
+_licenseGate();
+</script>
+
+<!-- ── LICENSE GATE HTML ──────────────────────────────────────────────────── -->
+<div id="licenseGate" style="display:none;position:fixed;inset:0;z-index:9999;background:#050510;align-items:center;justify-content:center;flex-direction:column;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <!-- Fondo gradiente igual que la app -->
+  <div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 30%,rgba(99,179,237,.08),transparent 50%),radial-gradient(circle at 80% 70%,rgba(183,148,244,.08),transparent 50%);pointer-events:none"></div>
+
+  <div style="position:relative;z-index:1;width:100%;max-width:420px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:0">
+
+    <!-- Logo -->
+    <div style="width:68px;height:68px;background:linear-gradient(135deg,#63b3ed 0%,#4299e1 50%,#b794f4 100%);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 4px 32px rgba(99,179,237,.4),0 0 0 1px rgba(99,179,237,.2);margin-bottom:18px">🚀</div>
+
+    <div style="font-size:26px;font-weight:800;letter-spacing:-.02em;color:#e2e8f0;margin-bottom:4px">Space MELI</div>
+    <div style="font-size:13px;color:#718096;margin-bottom:28px;text-align:center">Herramienta profesional para vendedores<br>en MercadoLibre Chile</div>
+
+    <!-- Card de acceso -->
+    <div style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:28px 24px">
+      <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:6px">Código de acceso</div>
+      <div style="font-size:11px;color:#718096;margin-bottom:14px">Ingresá el código que recibiste por email al comprar</div>
+
+      <input id="lgInput" type="text" placeholder="SM-XXXX-XXXX-XXXX"
+        style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#e2e8f0;font-size:15px;font-weight:600;letter-spacing:.08em;padding:12px 14px;outline:none;text-transform:uppercase;font-family:inherit;transition:border .2s"
+        onfocus="this.style.borderColor='rgba(99,179,237,.5)'"
+        onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+
+      <div id="lgErr" style="display:none;margin-top:8px;font-size:11px;color:#fc8181;padding:8px 10px;background:rgba(252,129,129,.08);border-radius:8px;border:1px solid rgba(252,129,129,.15)"></div>
+
+      <button id="lgBtn" style="margin-top:14px;width:100%;background:linear-gradient(135deg,#2563eb,#4f46e5);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;padding:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+        <svg id="lgSpin" style="display:none;width:16px;height:16px;animation:spin 1s linear infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/></svg>
+        <span class="lg-btn-text">Activar acceso</span>
+      </button>
+    </div>
+
+    <!-- Separador -->
+    <div style="display:flex;align-items:center;gap:12px;width:100%;margin:20px 0">
+      <div style="flex:1;height:1px;background:rgba(255,255,255,0.07)"></div>
+      <div style="font-size:11px;color:#4a5568">¿No tenés acceso?</div>
+      <div style="flex:1;height:1px;background:rgba(255,255,255,0.07)"></div>
+    </div>
+
+    <!-- Botón comprar -->
+    <a href="#" target="_blank" id="lgBuyBtn" onclick="this.href=STRIPE_URL"
+       style="width:100%;background:rgba(246,173,85,.09);border:1px solid rgba(246,173,85,.25);border-radius:14px;padding:18px 20px;text-decoration:none;display:block;text-align:center;transition:background .2s"
+       onmouseover="this.style.background='rgba(246,173,85,.15)'"
+       onmouseout="this.style.background='rgba(246,173,85,.09)'" >
+      <div style="font-size:18px;font-weight:800;color:#f6ad55;margin-bottom:2px">Comprar acceso → $XX/mes</div>
+      <div style="font-size:11px;color:#718096">Pago seguro con tarjeta · Cancelá cuando quieras</div>
+    </a>
+
+    <div style="margin-top:16px;font-size:10px;color:#4a5568;text-align:center">
+      ¿Problemas con tu código? Escribinos a <span style="color:#63b3ed">soporte@tu-dominio.cl</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
