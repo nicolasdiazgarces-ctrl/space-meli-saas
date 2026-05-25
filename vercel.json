@@ -1,17 +1,4 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "api/*.js", "use": "@vercel/node" },
-    { "src": "index.html", "use": "@vercel/static" },
-    { "src": "landing.html", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/api/_.*", "dest": "/index.html" },
-    { "src": "/api/(.*)", "dest": "/api/$1.js" },
-    { "src": "/landing", "dest": "/landing.html" },
-    { "src": "/landing.html", "dest": "/landing.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
   "functions": {
     "api/ai.js":                 { "maxDuration": 30, "memory": 256 },
     "api/generate-image.js":     { "maxDuration": 45, "memory": 256 },
@@ -19,15 +6,19 @@
     "api/trial.js":              { "maxDuration": 10, "memory": 128 },
     "api/send-license-email.js": { "maxDuration": 10, "memory": 128 }
   },
+  "rewrites": [
+    { "source": "/landing", "destination": "/landing.html" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options",  "value": "nosniff" },
-        { "key": "X-Frame-Options",         "value": "DENY" },
-        { "key": "X-XSS-Protection",        "value": "1; mode=block" },
-        { "key": "Referrer-Policy",         "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy",      "value": "camera=(), microphone=(), geolocation=()" },
+        { "key": "X-Content-Type-Options",   "value": "nosniff" },
+        { "key": "X-Frame-Options",          "value": "DENY" },
+        { "key": "X-XSS-Protection",         "value": "1; mode=block" },
+        { "key": "Referrer-Policy",          "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy",       "value": "camera=(), microphone=(), geolocation=()" },
         { "key": "Strict-Transport-Security","value": "max-age=63072000; includeSubDomains; preload" }
       ]
     }
