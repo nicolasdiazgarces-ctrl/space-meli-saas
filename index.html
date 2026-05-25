@@ -2978,7 +2978,13 @@ function _unlockApp(key) {
 }
 
 // Iniciar verificación de licencia al cargar
-_licenseGate();
+// NOTA: #licenseGate está definido DESPUÉS de este script, así que esperamos
+// a que el DOM esté completamente parseado antes de llamar a _licenseGate().
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _licenseGate);
+} else {
+  _licenseGate();
+}
 </script>
 
 <!-- ── LICENSE GATE HTML ──────────────────────────────────────────────────── -->
