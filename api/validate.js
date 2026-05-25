@@ -60,7 +60,11 @@ export default async function handler(req, res) {
     }).catch(() => {});
 
     // Calcular créditos (con reset mensual automático)
-    const imgTotal = license.img_credits_total ?? 200;
+    // Licencias de pago tienen mínimo 200 créditos (resuelve cuentas creadas con valor antiguo 50)
+    const isTrial  = license.plan === 'trial';
+    const imgTotal = isTrial
+      ? (license.img_credits_total ?? 5)
+      : Math.max(license.img_credits_total ?? 200, 200);
     let imgUsed    = license.img_credits_used  ?? 0;
     const resetAt  = license.img_credits_reset ? new Date(license.img_credits_reset) : null;
     if (resetAt && new Date() >= resetAt) imgUsed = 0; // reset visual

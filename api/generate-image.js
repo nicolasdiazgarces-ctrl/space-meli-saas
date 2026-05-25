@@ -55,8 +55,12 @@ export default async function handler(req, res) {
     if (!lic.active)                                              return res.status(403).json({ error: 'License deactivated' });
     if (lic.expires_at && new Date(lic.expires_at) < new Date()) return res.status(403).json({ error: 'License expired' });
 
-    const total = lic.img_credits_total ?? 200;
-    let used    = lic.img_credits_used  ?? 0;
+    // Licencias de pago tienen mínimo 200 créditos (resuelve cuentas creadas con valor antiguo 50)
+    const isTrial = lic.plan === 'trial';
+    const total   = isTrial
+      ? (lic.img_credits_total ?? 5)
+      : Math.max(lic.img_credits_total ?? 200, 200);
+    let used = lic.img_credits_used ?? 0;
 
     // Reset mensual automático si corresponde
     const resetAt  = lic.img_credits_reset ? new Date(lic.img_credits_reset) : null;
