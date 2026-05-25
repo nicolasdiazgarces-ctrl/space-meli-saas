@@ -377,26 +377,19 @@ select.dims-input{text-align:left;padding-left:6px;cursor:pointer}
       <button class="modal-close" id="btnCloseCfg">✕</button>
     </div>
     <div class="form-group">
-      <div class="form-label">🤖 Claude API</div>
-      <div style="background:rgba(0,200,100,.08);border:1px solid rgba(0,200,100,.3);border-radius:6px;padding:8px 12px;font-size:11px;color:#aaa;">🔒 Gestionada por el servidor — no necesitás configurarla aquí.</div>
+      <div class="form-label">🤖 Claude IA (textos)</div>
+      <div style="background:rgba(0,200,100,.08);border:1px solid rgba(0,200,100,.3);border-radius:6px;padding:8px 12px;font-size:11px;color:#aaa;">🔒 Gestionada por el servidor — incluida en tu plan.</div>
       <input type="hidden" id="cfgClaude">
     </div>
     <div class="form-group">
-      <div class="form-label">🖼️ Gemini API Key <span style="color:var(--green);font-size:9px">GRATIS · Google AI Studio</span></div>
-      <input class="cfg-input" id="cfgGemini" type="password" placeholder="AIzaSy...">
-      <div class="cfg-hint">Gratis en <a id="lnkGemini">aistudio.google.com/apikey</a> → Get API Key — para generar imágenes IA de alta calidad</div>
+      <div class="form-label">🎨 Imágenes IA (FLUX)</div>
+      <div style="background:rgba(99,179,237,.08);border:1px solid rgba(99,179,237,.25);border-radius:6px;padding:8px 12px;font-size:11px;color:#aaa;">✨ Incluidas en tu plan — no necesitás ninguna API Key. Tus créditos se renuevan cada mes.</div>
     </div>
-    <div class="form-group">
-      <div class="form-label">🟢 OpenAI API Key <span style="color:var(--green);font-size:9px">DALL-E 3 · mejor calidad de imágenes</span></div>
-      <input class="cfg-input" id="cfgOpenAI" type="password" placeholder="sk-...">
-      <div class="cfg-hint">Obtén tu key en <a id="lnkOpenAI">platform.openai.com/api-keys</a> → DALL-E 3 da las imágenes más realistas y consistentes</div>
-    </div>
-    <div class="form-group">
-      <div class="form-label">🎨 Together AI Key <span style="color:var(--dim);font-size:9px">opcional · FLUX</span></div>
-      <input class="cfg-input" id="cfgTogether" type="password" placeholder="tgp_v1_...">
-      <div class="cfg-hint">Si tenés créditos en <a id="lnkTogether">api.together.ai</a></div>
-    </div>
-    <button class="btn-save" id="btnSaveCfg">💾 Guardar</button>
+    <!-- Campos ocultos para compatibilidad con código existente -->
+    <input type="hidden" id="cfgGemini">
+    <input type="hidden" id="cfgOpenAI">
+    <input type="hidden" id="cfgTogether">
+    <button class="btn-save" id="btnSaveCfg">✅ Cerrar</button>
   </div>
 </div>
 
@@ -606,7 +599,10 @@ select.dims-input{text-align:left;padding-left:6px;cursor:pointer}
         <!-- Generar con IA -->
         <div class="card">
           <div class="card-title">🤖 Generar con IA</div>
-          <div id="noKeyBanner" style="display:none"></div>
+          <!-- Barra de créditos de imágenes -->
+          <div id="imgCreditsBar" style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px">
+            <div style="font-size:10px;color:var(--dim)">Cargando créditos...</div>
+          </div>
           <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
             <button class="btn-sm c" id="btnSelAll">✓ Todas</button>
             <button class="btn-sm" id="btnSelNone">✕ Ninguna</button>
@@ -813,11 +809,8 @@ function kb(...keys) {
 }
 
 const KEYS = {
-  // claude: clave gestionada por servidor — nunca expuesta al browser
-  openai:   localStorage.getItem('sm_openai')   || '',   // DALL-E 3 — mejor calidad
-  gemini:   localStorage.getItem('sm_gemini')   || '',   // gratis en aistudio.google.com/apikey
-  together: localStorage.getItem('sm_together') || '',
-  hf:       localStorage.getItem('sm_hf')       || ''
+  // Imágenes: gestionadas server-side con créditos. No se necesitan keys aquí.
+  openai:   '', gemini: '', together: '', hf: ''
 };
 
 // ── DIMENSIONES ───────────────────────────────────────────────────────────────
@@ -1319,25 +1312,12 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 document.getElementById('btnOpenCfg').addEventListener('click', () => {
   document.getElementById('cfgOpenAI').value   = KEYS.openai;
-  document.getElementById('cfgGemini').value   = KEYS.gemini;
-  document.getElementById('cfgTogether').value = KEYS.together;
   document.getElementById('modalCfg').classList.add('open');
 });
 document.getElementById('btnCloseCfg').addEventListener('click', () => document.getElementById('modalCfg').classList.remove('open'));
 document.getElementById('btnSaveCfg').addEventListener('click', () => {
-  KEYS.openai   = document.getElementById('cfgOpenAI').value.trim();
-  KEYS.gemini   = document.getElementById('cfgGemini').value.trim();
-  KEYS.together = document.getElementById('cfgTogether').value.trim();
-  localStorage.setItem('sm_openai',   KEYS.openai);
-  localStorage.setItem('sm_gemini',   KEYS.gemini);
-  localStorage.setItem('sm_together', KEYS.together);
   document.getElementById('modalCfg').classList.remove('open');
-  checkImageKeys();
-  toast('✅ Configuración guardada');
 });
-document.getElementById('lnkOpenAI').addEventListener('click', e => { e.preventDefault(); window.open('https://platform.openai.com/api-keys','_blank'); });
-document.getElementById('lnkGemini').addEventListener('click', e => { e.preventDefault(); window.open('https://aistudio.google.com/apikey','_blank'); });
-document.getElementById('lnkTogether').addEventListener('click', e => { e.preventDefault(); window.open('https://api.together.ai/settings/billing','_blank'); });
 
 // ── API CALLS ─────────────────────────────────────────────────────────────────
 async function callClaude(prompt, maxTokens=1800) {
@@ -1367,147 +1347,56 @@ async function callClaudeVision(prompt, imageB64, maxTokens=2000) {
   return d.text;
 }
 
-// ── IMAGEN IA — Together AI directo (browser) → Gemini directo (browser) ─────
-// Adapta el prompt para modo imagen→imagen (indica usar el producto de la foto de referencia)
-function adaptPromptImg2Img(prompt) {
-  return `INSTRUCCIÓN CRÍTICA: Usa el producto EXACTO que aparece en la imagen de referencia adjunta — mismo diseño, mismos colores, mismos materiales, misma forma. NO inventes ni reemplaces el producto.
+// ── IMAGEN IA — Server-side via /api/generate-image ──────────────────────────
+// El servidor usa Together AI FLUX con la key del propietario.
+// Se descuentan créditos por imagen. Sin foto = 1 crédito, con foto = 3 créditos.
 
-${prompt}
+let _imgCreditsLeft  = null; // null = no cargado aún
+let _imgCreditsTotal = null;
 
-RECUERDA: El producto de la imagen de referencia debe aparecer IDÉNTICO en el resultado. Solo cambia el escenario, la iluminación y el estilo según las instrucciones de arriba.`;
-}
-
-async function callOpenAIImage(prompt) {
-  if (!KEYS.openai) throw new Error('Sin OpenAI key');
-  // DALL-E 3 tiene límite de 4000 chars en el prompt
-  const truncated = prompt.slice(0, 3900);
-  const res = await fetch('https://api.openai.com/v1/images/generations', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${KEYS.openai}` },
-    body: JSON.stringify({
-      model: 'dall-e-3',
-      prompt: truncated,
-      n: 1,
-      size: '1024x1024',
-      quality: 'standard',
-      response_format: 'b64_json'
-    })
-  });
-  const data = await res.json();
-  if (!res.ok || data.error) throw new Error(data.error?.message?.slice(0,120) || `OpenAI error ${res.status}`);
-  const b64 = data.data?.[0]?.b64_json;
-  if (!b64) throw new Error('DALL-E 3: sin imagen en respuesta');
-  return `data:image/png;base64,${b64}`;
-}
-
-async function callTogetherAI(prompt, imageB64=null) {
-  if (!KEYS.together) throw new Error('Sin Together AI key');
-  let payload;
-  if (imageB64) {
-    // FLUX.1-kontext-max: image editing / image-to-image
-    payload = {
-      model: 'black-forest-labs/FLUX.1-kontext-max',
-      prompt: adaptPromptImg2Img(prompt),
-      image_url: imageB64,
-      n: 1, steps: 28, width: 1024, height: 1024,
-      response_format: 'b64_json'
-    };
-  } else {
-    // FLUX.1-schnell: text-to-image (más rápido y barato)
-    payload = {
-      model: 'black-forest-labs/FLUX.1-schnell',
-      prompt, n: 1, steps: 4, width: 1024, height: 1024,
-      response_format: 'b64_json'
-    };
-  }
-  const res = await fetch('https://api.together.xyz/v1/images/generations', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${KEYS.together}` },
-    body: JSON.stringify(payload)
-  });
-  const data = await res.json();
-  if (res.status === 402) throw new Error('CREDITS_EMPTY');
-  if (!res.ok || data.error) throw new Error(data.error?.message?.slice(0,100) || `Error ${res.status}`);
-  const b64 = data.data?.[0]?.b64_json;
-  const url = data.data?.[0]?.url;
-  if (b64) return `data:image/png;base64,${b64}`;
-  if (url) return url;
-  throw new Error('Sin imagen en respuesta Together AI');
-}
-
-async function callGeminiImage(prompt, imageB64=null) {
-  if (!KEYS.gemini) throw new Error('Configura Gemini API Key en ⚙️ (gratis en aistudio.google.com/apikey)');
-  const parts = [{ text: imageB64 ? adaptPromptImg2Img(prompt) : prompt }];
-  if (imageB64) {
-    const mime = imageB64.split(';')[0].split(':')[1];
-    const data = imageB64.split(',')[1];
-    parts.push({ inlineData: { mimeType: mime, data } });
-  }
-  const body = JSON.stringify({
-    contents: [{ parts }],
-    generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
-  });
-  const headers = { 'Content-Type': 'application/json' };
-  // Modelos Gemini con soporte de generación de imagen nativa (verificados mayo 2025)
-  const models = [
-    'gemini-2.5-flash-image',
-    'gemini-3.1-flash-image-preview',
-    'gemini-3-pro-image-preview',
-  ];
-  let lastErr = '';
-  for (const model of models) {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${KEYS.gemini}`, { method:'POST', headers, body });
-    const data = await res.json();
-    if (!res.ok || data.error) { lastErr = data.error?.message?.slice(0,120) || `Gemini ${model} ${res.status}`; continue; }
-    const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-    if (!part) { lastErr = `${model}: no devolvió imagen`; continue; }
-    return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-  }
-  throw new Error(lastErr || 'Gemini no pudo generar la imagen');
+function _updateCreditsUI(left, total) {
+  _imgCreditsLeft  = left;
+  _imgCreditsTotal = total;
+  const el = document.getElementById('imgCreditsBar');
+  if (!el) return;
+  const pct = total > 0 ? Math.round((left / total) * 100) : 0;
+  const color = left === 0 ? 'var(--red)' : left <= 5 ? 'var(--gold)' : 'var(--green)';
+  el.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+    <span style="font-size:10px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em">✨ Créditos de imágenes</span>
+    <span style="font-size:12px;font-weight:800;color:${color}">${left}<span style="color:var(--dim);font-weight:400;font-size:10px">/${total}</span></span>
+  </div>
+  <div style="background:rgba(255,255,255,.06);border-radius:4px;height:5px;overflow:hidden">
+    <div style="width:${pct}%;height:100%;background:${color};border-radius:4px;transition:width .4s"></div>
+  </div>
+  ${left === 0 ? '<div style="color:var(--red);font-size:10px;margin-top:6px;font-weight:600">⛔ Sin créditos este mes. Se renuevan el próximo ciclo.</div>' : ''}
+  ${left > 0 && left <= 5 ? '<div style="color:var(--gold);font-size:10px;margin-top:6px">⚠️ Pocos créditos restantes.</div>' : ''}`;
 }
 
 async function callImageAI(prompt, imageB64=null) {
-  if (imageB64) {
-    // Con foto de referencia: Gemini primero (único que hace image-to-image nativo)
-    if (KEYS.gemini) {
-      try { return await callGeminiImage(prompt, imageB64); }
-      catch(e) {
-        const isQuota = e.message.toLowerCase().includes('quota') || e.message.toLowerCase().includes('exceeded');
-        if (!isQuota) throw e;
-        console.warn('[SpaceMELI] Gemini quota agotada, fallback');
-        toast('⚠️ Gemini sin quota — usando alternativa (sin referencia de foto)');
-      }
-    }
-    // Fallback img-to-img: Together FLUX-kontext
-    if (KEYS.together) {
-      try { return await callTogetherAI(prompt, imageB64); }
-      catch(e) {
-        if (e.message === 'CREDITS_EMPTY') { /* seguir */ }
-        else return await callTogetherAI(prompt); // img falló, texto solo
-      }
-    }
-    // Último recurso con foto: DALL-E 3 texto (sin la foto de referencia)
-    if (KEYS.openai) {
-      toast('⚠️ Usando DALL-E 3 sin foto de referencia');
-      return await callOpenAIImage(prompt);
-    }
-    throw new Error('Sin providers disponibles. Configurá al menos una API Key en ⚙️.');
+  const licKey = localStorage.getItem('sm_lic_key') || '';
+  if (!licKey) throw new Error('Activá tu licencia primero en ⚙️');
+
+  const res = await fetch('/api/generate-image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: licKey, prompt, imageB64: imageB64 || null })
+  });
+  const data = await res.json();
+
+  if (res.status === 402 || data.error === 'SIN_CREDITOS') {
+    _updateCreditsUI(data.creditsLeft ?? 0, data.creditsTotal ?? 50);
+    throw new Error('SIN_CREDITOS');
+  }
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || data.details || `Error generando imagen (${res.status})`);
   }
 
-  // Sin foto: DALL-E 3 primero (mejor calidad y consistencia de estilo)
-  if (KEYS.openai) {
-    try { return await callOpenAIImage(prompt); }
-    catch(e) {
-      console.warn('[SpaceMELI] DALL-E 3 falló:', e.message);
-      // continuar con fallbacks
-    }
+  // Actualizar contador de créditos en la UI
+  if (typeof data.creditsLeft === 'number') {
+    _updateCreditsUI(data.creditsLeft, data.creditsTotal);
   }
-  if (KEYS.together) {
-    try { return await callTogetherAI(prompt); }
-    catch(e) { if (e.message !== 'CREDITS_EMPTY') throw e; }
-  }
-  if (KEYS.gemini) return await callGeminiImage(prompt);
-  throw new Error('Configurá OpenAI, Together AI o Gemini en ⚙️ para generar imágenes');
+
+  return data.image;
 }
 
 async function blobToDataUrl(blob) {
@@ -2427,49 +2316,32 @@ document.getElementById('instantGrid').addEventListener('click', e => {
   a.href = btn.dataset.url; a.download = `meli-${btn.dataset.name}.png`; a.click();
 });
 
-// Banner: ocultar siempre (ahora HuggingFace es gratis)
-function checkImageKeys() {
-  const banner = document.getElementById('noKeyBanner');
-  if (!banner) return;
-  if (!KEYS.openai && !KEYS.gemini && !KEYS.together) {
-    // Sin ninguna key
-    banner.style.display = 'block';
-    banner.innerHTML = `<div style="background:rgba(246,173,85,.08);border:1px solid rgba(246,173,85,.25);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:11px">
-      <div style="font-weight:700;color:var(--gold);margin-bottom:4px">🔑 Necesitás una API Key para generar imágenes</div>
-      <div style="color:var(--dim);line-height:1.6">
-        <b style="color:var(--text)">Opción A — OpenAI DALL-E 3 (mejor calidad):</b> <b style="color:var(--cyan);cursor:pointer" onclick="window.open('https://platform.openai.com/api-keys','_blank')">platform.openai.com/api-keys</b> → pegala en ⚙️<br>
-        <b style="color:var(--text)">Opción B — Gemini (gratis):</b> <b style="color:var(--cyan);cursor:pointer" onclick="window.open('https://aistudio.google.com/apikey','_blank')">aistudio.google.com/apikey</b> → pegala en ⚙️<br>
-        <b style="color:var(--text)">Opción C — Together AI ($):</b> <b style="color:var(--cyan);cursor:pointer" onclick="window.open('https://api.together.ai','_blank')">api.together.ai</b> → pegala en ⚙️
-      </div>
-    </div>`;
-  } else if (!KEYS.gemini && KEYS.together) {
-    // Solo Together AI — recomendar Gemini para img2img
-    banner.style.display = 'block';
-    banner.innerHTML = `<div style="background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.2);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px">
-      <div style="font-weight:700;color:var(--cyan);margin-bottom:3px">💡 Tip: agrega Gemini para generar desde TU foto</div>
-      <div style="color:var(--dim);line-height:1.5">
-        Con <b style="color:var(--text)">Together AI</b> generás desde el nombre del producto.<br>
-        Con <b style="color:var(--text)">Gemini + tu foto</b> generás variaciones de tu producto REAL (mismo diseño).<br>
-        <b style="color:var(--cyan);cursor:pointer" onclick="window.open('https://aistudio.google.com/apikey','_blank')">Obtener Gemini Key gratis →</b> (2 min, sin tarjeta)
-      </div>
-    </div>`;
-  } else if (KEYS.openai && !KEYS.gemini) {
-    // Tiene DALL-E 3 pero no Gemini — mostrar tip de consistencia con foto
-    banner.style.display = 'block';
-    banner.innerHTML = `<div style="background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px">
-      <div style="font-weight:700;color:var(--green);margin-bottom:3px">🟢 DALL-E 3 activo — máxima calidad de texto</div>
-      <div style="color:var(--dim);line-height:1.55">
-        <b style="color:var(--text)">Para imágenes 100% consistentes:</b> sube tu foto del producto + agrega Gemini Key (img-to-img).<br>
-        <b style="color:var(--text)">Para fotos 03 y 04b con características:</b> genera primero la descripción del producto o completa el campo "Detalles visuales".<br>
-        <b style="color:var(--cyan);cursor:pointer" onclick="window.open('https://aistudio.google.com/apikey','_blank')">Obtener Gemini Key gratis →</b>
-      </div>
-    </div>`;
-  } else {
-    banner.style.display = 'none';
-    banner.innerHTML = '';
+// Cargar créditos de imagen al abrir el panel de imágenes
+async function loadImageCredits() {
+  const licKey = localStorage.getItem('sm_lic_key') || '';
+  if (!licKey) return;
+  try {
+    const res = await fetch('/api/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: licKey })
+    });
+    const data = await res.json();
+    if (data.valid) {
+      // validate endpoint devuelve créditos si el schema los tiene
+      const left  = typeof data.img_credits_left  === 'number' ? data.img_credits_left  : 50;
+      const total = typeof data.img_credits_total === 'number' ? data.img_credits_total : 50;
+      _updateCreditsUI(left, total);
+    }
+  } catch(e) {
+    // Si falla silenciosamente, mostrar estado neutro
+    _updateCreditsUI(50, 50);
   }
 }
-checkImageKeys();
+// Cargar créditos cuando se abre el panel de imágenes
+document.querySelector('.nav-item[data-panel="images"]').addEventListener('click', loadImageCredits, { once: false });
+// También cargar al inicio si el panel de imágenes ya está activo
+if (document.getElementById('panel-images')?.classList.contains('active')) loadImageCredits();
 
 // ── CANVAS OVERLAY — Características (texto 100% controlado, sin depender del modelo IA) ────
 
@@ -2699,11 +2571,7 @@ document.getElementById('btnGenImgs').addEventListener('click', async () => {
   const prog = document.getElementById('imgProg');
   const out = document.getElementById('imgsOut');
   const primaryImg = getPrimaryImage();
-  const provider = (primaryImg && KEYS.gemini)
-    ? `🤖 Gemini + ${productImages.length > 1 ? productImages.length + ' fotos' : 'tu foto'}`
-    : KEYS.openai ? '🟢 DALL-E 3'
-    : KEYS.together ? '🎨 Together AI'
-    : '🤖 IA';
+  const provider = primaryImg ? '🎨 FLUX + tu foto' : '🎨 FLUX';
   btn.disabled = true; btn.innerHTML = `<div class="spin"></div> Preparando...`;
   prog.classList.add('show'); out.innerHTML = '';
 

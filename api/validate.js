@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     if (!supaUrl || !supaKey) {
       return res.status(500).json({ valid: false, error: 'Server config error' });
     }
-    const query = supaUrl + '/rest/v1/licenses?key=eq.' + encodeURIComponent(cleanKey) + '&select=key,email,plan,active,expires_at&limit=1';
+    const query = supaUrl + '/rest/v1/licenses?key=eq.' + encodeURIComponent(cleanKey) + '&select=key,email,plan,active,expires_at,img_credits_total,img_credits_used,img_credits_reset&limit=1';
     const dbRes = await fetch(query, {
       headers: { apikey: supaKey, Authorization: 'Bearer ' + supaKey, 'Content-Type': 'application/json' }
     });
@@ -31,7 +31,20 @@ export default async function handler(req, res) {
       headers: { apikey: supaKey, Authorization: 'Bearer ' + supaKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
       body: JSON.stringify({ last_validated_at: new Date().toISOString() })
     }).catch(() => {});
-    return res.json({ valid: true, email: license.email, plan: license.plan, expires_at: license.expires_at });
+    // Calcular créditos (con reset mensual automático)
+    const imgTotal = license.img_credits_total ?? 50;
+    let imgUsed    = license.img_credits_used  ?? 0;
+    const resetAt  = license.img_credits_reset ? new Date(license.img_credits_reset) : null;
+    if (resetAt && new Date() >= resetAt) imgUsed = 0; // reset visual (el reset real ocurre en generate-image)
+
+    return res.json({
+      valid: true,
+      email: license.email,
+      plan: license.plan,
+      expires_at: license.expires_at,
+      img_credits_total: imgTotal,
+      img_credits_left:  Math.max(0, imgTotal - imgUsed)
+    });
   } catch (err) {
     return res.status(500).json({ valid: false, error: 'Server error' });
   }

@@ -10,7 +10,11 @@ CREATE TABLE licenses (
   stripe_customer_id  TEXT,
   stripe_session_id   TEXT,
   last_validated_at   TIMESTAMPTZ,
-  notes               TEXT
+  notes               TEXT,
+  -- Créditos de imágenes IA (gestionados server-side)
+  img_credits_total   INT  NOT NULL DEFAULT 50,
+  img_credits_used    INT  NOT NULL DEFAULT 0,
+  img_credits_reset   TIMESTAMPTZ DEFAULT (DATE_TRUNC('month', NOW()) + INTERVAL '1 month')
 );
 
 CREATE INDEX idx_licenses_key   ON licenses (key);
