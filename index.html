@@ -273,6 +273,95 @@ select.dims-input{text-align:left;padding-left:6px;cursor:pointer}
 .ct-pos{background:linear-gradient(135deg,var(--gold),#ed8936);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:800!important}
 .ct-dim{color:var(--muted)!important;font-size:10px!important;font-weight:400!important}
 .ct-green{color:var(--green)!important}
+
+/* ── HAMBURGER (oculto en desktop) ─────────────────────────────────────── */
+.btn-hamburger{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:4px 8px;line-height:1;border-radius:8px;transition:background .2s;flex-shrink:0}
+.btn-hamburger:hover{background:rgba(255,255,255,.06)}
+
+/* ── OVERLAY sidebar en mobile ──────────────────────────────────────────── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,16,.8);z-index:400;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.sidebar-overlay.open{display:block}
+
+/* ── RESPONSIVE MÓVIL ───────────────────────────────────────────────────── */
+@media (max-width:768px){
+  html,body{overflow:auto;height:auto}
+
+  /* Layout raíz */
+  .app{flex-direction:column;height:auto;min-height:100dvh;overflow:visible}
+
+  /* Sidebar → drawer lateral */
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;
+    width:82vw;max-width:300px;z-index:500;
+    transform:translateX(-110%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    overflow-y:auto;overflow-x:hidden
+  }
+  .sidebar.mob-open{transform:translateX(0)}
+
+  /* Hamburger visible */
+  .btn-hamburger{display:flex;align-items:center;justify-content:center}
+
+  /* Main ocupa todo el ancho */
+  .main{width:100%;min-height:100dvh;display:flex;flex-direction:column}
+
+  /* Header mobile */
+  .main-header{padding:10px 12px;gap:8px}
+  .header-title{font-size:13px;gap:6px;flex:1;min-width:0}
+  #mainTitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+  .status-pill{font-size:8px;padding:3px 8px;white-space:nowrap}
+
+  /* Contenido */
+  .content{padding:14px 12px}
+
+  /* Grids de 3 → 2 columnas en móvil */
+  .shot-grid{grid-template-columns:repeat(2,1fr)}
+  .instant-grid{grid-template-columns:repeat(2,1fr)}
+  .photo-grid{grid-template-columns:repeat(2,1fr)}
+  .imgs-grid{grid-template-columns:1fr}
+
+  /* Calculadora: precio en columna */
+  .price-grid{grid-template-columns:1fr 1fr}
+
+  /* Modal → bottom sheet */
+  .modal-overlay{align-items:flex-end;padding:0}
+  .modal{
+    width:100%;max-width:100%;
+    border-radius:20px 20px 0 0;
+    max-height:90dvh;overflow-y:auto;
+    padding-bottom:env(safe-area-inset-bottom,16px)
+  }
+
+  /* Targets táctiles más grandes */
+  .nav-item{padding:11px 14px}
+  .nav-label{font-size:13px}
+  .nav-icon{font-size:16px}
+  .btn-ia{padding:13px;font-size:13px}
+  .btn-gen{padding:14px;font-size:13px}
+  .btn-cfg,.btn-notion{padding:11px 14px;font-size:12px}
+
+  /* Inputs más legibles */
+  .product-block{padding:12px 14px}
+  .product-input{font-size:14px;min-height:64px}
+  .dims-block{padding:8px 14px}
+  .input-field,.form-input,.form-textarea{font-size:14px;padding:10px 12px}
+
+  /* Cards y chips */
+  .card{padding:14px}
+  .title-item{padding:12px 44px 12px 14px}
+  .t-text{font-size:13px}
+
+  /* Tabla calculadora: scroll horizontal */
+  .cost-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+
+/* Soporte notch / safe area iPhone */
+@supports(padding:max(0px)){
+  @media(max-width:768px){
+    .sidebar-footer{padding-bottom:max(12px,env(safe-area-inset-bottom))}
+    .main-header{padding-top:max(10px,env(safe-area-inset-top))}
+  }
+}
 </style>
 </head>
 <body>
@@ -310,6 +399,9 @@ select.dims-input{text-align:left;padding-left:6px;cursor:pointer}
     <button class="btn-save" id="btnSaveCfg">💾 Guardar</button>
   </div>
 </div>
+
+<!-- OVERLAY sidebar mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <!-- APP -->
 <div class="app" id="appRoot" style="display:none">
@@ -374,6 +466,7 @@ select.dims-input{text-align:left;padding-left:6px;cursor:pointer}
   <!-- MAIN -->
   <div class="main">
     <div class="main-header">
+      <button class="btn-hamburger" id="btnHamburger" aria-label="Menú">☰</button>
       <div class="header-title"><span class="header-icon" id="mainIcon">🏆</span><span id="mainTitle">Títulos SEO para MELI Chile</span></div>
       <span class="status-pill ready" id="statusPill">Listo</span>
     </div>
@@ -1181,6 +1274,32 @@ const panelTitles = {
   answer:['💬','Responder Preguntas'],
   ads:   ['🎯','Análisis de Campañas Ads']
 };
+// ── MOBILE SIDEBAR ────────────────────────────────────────────────────────
+const _sidebar        = document.querySelector('.sidebar');
+const _sidebarOverlay = document.getElementById('sidebarOverlay');
+const _btnHamburger   = document.getElementById('btnHamburger');
+
+function _openSidebar()  {
+  _sidebar.classList.add('mob-open');
+  _sidebarOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function _closeSidebar() {
+  _sidebar.classList.remove('mob-open');
+  _sidebarOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+_btnHamburger.addEventListener('click', () =>
+  _sidebar.classList.contains('mob-open') ? _closeSidebar() : _openSidebar()
+);
+_sidebarOverlay.addEventListener('click', _closeSidebar);
+
+// Cerrar sidebar al swipe izquierda
+let _touchStartX = 0;
+_sidebar.addEventListener('touchstart', e => { _touchStartX = e.touches[0].clientX; }, {passive:true});
+_sidebar.addEventListener('touchend',   e => { if (_touchStartX - e.changedTouches[0].clientX > 60) _closeSidebar(); }, {passive:true});
+
 document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
   item.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -1192,6 +1311,8 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
       document.getElementById('mainIcon').textContent = t[0];
       document.getElementById('mainTitle').textContent = t[1];
     }
+    // En móvil: cerrar el sidebar al elegir una sección
+    if (window.innerWidth <= 768) _closeSidebar();
   });
 });
 
