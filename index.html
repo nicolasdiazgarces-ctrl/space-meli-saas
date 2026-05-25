@@ -411,6 +411,7 @@ select.dims-input{text-align:left;padding-left:6px;cursor:pointer}
         </div>
       </div>
       <div class="brand-badge">✦ MercadoLibre Chile IA</div>
+      <div id="greetingSlot" style="display:none;margin-top:10px;padding:9px 12px;background:rgba(183,148,244,.07);border:1px solid rgba(183,148,244,.18);border-radius:10px;font-size:12px;font-weight:600;color:#c4b5fd;line-height:1.4"></div>
     </div>
 
     <div class="product-block">
@@ -450,10 +451,9 @@ select.dims-input{text-align:left;padding-left:6px;cursor:pointer}
     </nav>
 
     <div class="sidebar-footer">
-      <a class="btn-notion" href="https://www.notion.so/36a66d4f955a8103ac49d253f1d63ad4" target="_blank">
-        <span style="font-size:14px">📓</span><span>Notion Hub</span>
-      </a>
-      <button class="btn-cfg" id="btnOpenCfg"><span style="font-size:14px">⚙️</span><span>Configuración API Keys</span></button>
+      <!-- Contador de créditos de imagen -->
+      <div id="sidebarCredits" style="display:none;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:10px 12px"></div>
+      <button class="btn-cfg" id="btnOpenCfg" style="display:none"><span style="font-size:14px">⚙️</span><span>Configuración API Keys</span></button>
     </div>
   </div>
 
@@ -1358,19 +1358,45 @@ let _imgCreditsTotal = null;
 function _updateCreditsUI(left, total) {
   _imgCreditsLeft  = left;
   _imgCreditsTotal = total;
-  const el = document.getElementById('imgCreditsBar');
-  if (!el) return;
-  const pct = total > 0 ? Math.round((left / total) * 100) : 0;
+  const pct   = total > 0 ? Math.round((left / total) * 100) : 0;
   const color = left === 0 ? 'var(--red)' : left <= 5 ? 'var(--gold)' : 'var(--green)';
-  el.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-    <span style="font-size:10px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em">✨ Créditos de imágenes</span>
-    <span style="font-size:12px;font-weight:800;color:${color}">${left}<span style="color:var(--dim);font-weight:400;font-size:10px">/${total}</span></span>
-  </div>
-  <div style="background:rgba(255,255,255,.06);border-radius:4px;height:5px;overflow:hidden">
-    <div style="width:${pct}%;height:100%;background:${color};border-radius:4px;transition:width .4s"></div>
-  </div>
-  ${left === 0 ? '<div style="color:var(--red);font-size:10px;margin-top:6px;font-weight:600">⛔ Sin créditos este mes. Se renuevan el próximo ciclo.</div>' : ''}
-  ${left > 0 && left <= 5 ? '<div style="color:var(--gold);font-size:10px;margin-top:6px">⚠️ Pocos créditos restantes.</div>' : ''}`;
+
+  // ── Panel de imágenes (detallado) ────────────────────────────────────────
+  const el = document.getElementById('imgCreditsBar');
+  if (el) {
+    el.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <span style="font-size:10px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em">✨ Créditos de imágenes</span>
+      <span style="font-size:12px;font-weight:800;color:${color}">${left}<span style="color:var(--dim);font-weight:400;font-size:10px">/${total}</span></span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:4px;height:5px;overflow:hidden">
+      <div style="width:${pct}%;height:100%;background:${color};border-radius:4px;transition:width .4s"></div>
+    </div>
+    ${left === 0 ? '<div style="color:var(--red);font-size:10px;margin-top:6px;font-weight:600">⛔ Sin créditos este mes. Se renuevan el próximo ciclo.</div>' : ''}
+    ${left > 0 && left <= 5 ? '<div style="color:var(--gold);font-size:10px;margin-top:6px">⚠️ Pocos créditos restantes.</div>' : ''}`;
+  }
+
+  // ── Sidebar (siempre visible, compacto) ──────────────────────────────────
+  const sb = document.getElementById('sidebarCredits');
+  if (sb) {
+    sb.style.display = 'block';
+    const costHint = left > 0
+      ? `<span style="color:var(--dim);font-size:9px">sin foto: 1 cr · con foto: 3 cr</span>`
+      : '';
+    sb.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:10px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.06em">🖼️ Imágenes IA</span>
+        <span style="font-size:13px;font-weight:800;color:${color}">${left}<span style="color:var(--dim);font-weight:400;font-size:10px"> / ${total}</span></span>
+      </div>
+      <div style="background:rgba(255,255,255,.06);border-radius:4px;height:4px;overflow:hidden;margin-bottom:5px">
+        <div style="width:${pct}%;height:100%;background:${color};border-radius:4px;transition:width .5s"></div>
+      </div>
+      ${left === 0
+        ? '<div style="color:var(--red);font-size:9px;font-weight:600">⛔ Sin créditos — se renuevan el próximo ciclo</div>'
+        : left <= 5
+          ? `<div style="color:var(--gold);font-size:9px">⚠️ Pocos créditos · ${costHint}</div>`
+          : `<div style="font-size:9px">${costHint}</div>`
+      }`;
+  }
 }
 
 async function callImageAI(prompt, imageB64=null) {
@@ -1385,7 +1411,7 @@ async function callImageAI(prompt, imageB64=null) {
   const data = await res.json();
 
   if (res.status === 402 || data.error === 'SIN_CREDITOS') {
-    _updateCreditsUI(data.creditsLeft ?? 0, data.creditsTotal ?? 50);
+    _updateCreditsUI(data.creditsLeft ?? 0, data.creditsTotal ?? 200);
     throw new Error('SIN_CREDITOS');
   }
   if (!res.ok || !data.ok) {
@@ -2330,13 +2356,13 @@ async function loadImageCredits() {
     const data = await res.json();
     if (data.valid) {
       // validate endpoint devuelve créditos si el schema los tiene
-      const left  = typeof data.img_credits_left  === 'number' ? data.img_credits_left  : 50;
-      const total = typeof data.img_credits_total === 'number' ? data.img_credits_total : 50;
+      const left  = typeof data.img_credits_left  === 'number' ? data.img_credits_left  : 200;
+      const total = typeof data.img_credits_total === 'number' ? data.img_credits_total : 200;
       _updateCreditsUI(left, total);
     }
   } catch(e) {
     // Si falla silenciosamente, mostrar estado neutro
-    _updateCreditsUI(50, 50);
+    _updateCreditsUI(200, 200);
   }
 }
 // Cargar créditos cuando se abre el panel de imágenes
@@ -2883,6 +2909,62 @@ function _licenseGate() {
   btn.addEventListener('click', _validateKey);
   inp.addEventListener('keydown', e => { if(e.key==='Enter') _validateKey(); });
 
+  // ── Prueba gratuita ────────────────────────────────────────────────────
+  const trialEmail = document.getElementById('lgTrialEmail');
+  const trialBtn   = document.getElementById('lgTrialBtn');
+  const trialErr   = document.getElementById('lgTrialErr');
+  const trialSpin  = document.getElementById('lgTrialSpin');
+
+  async function _startTrial() {
+    const email = (trialEmail?.value || '').trim();
+    const name  = (document.getElementById('lgName')?.value || '').trim();
+    if (!email || !email.includes('@')) {
+      trialErr.textContent = '📧 Ingresá un email válido';
+      trialErr.style.display = 'block';
+      return;
+    }
+    trialErr.style.display = 'none';
+    trialBtn.disabled = true;
+    trialSpin.style.display = 'inline-block';
+    trialBtn.querySelector('.lg-trial-text').textContent = 'Creando tu acceso...';
+
+    try {
+      const res  = await fetch('/api/trial', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name })
+      });
+      const data = await res.json();
+
+      if (data.ok && data.key) {
+        localStorage.setItem('sm_lic_key',   data.key);
+        localStorage.setItem('sm_lic_ok',    '1');
+        localStorage.setItem('sm_lic_ts',    String(Date.now()));
+        localStorage.setItem('sm_lic_email', email);
+        localStorage.setItem('sm_lic_trial', data.paid ? '0' : '1');
+        if (name) localStorage.setItem('sm_lic_name', name);
+        gate.style.transition = 'opacity .4s ease';
+        gate.style.opacity = '0';
+        setTimeout(() => { gate.style.display = 'none'; _unlockApp(data.key); }, 420);
+      } else {
+        trialErr.textContent = data.error || '❌ Error al crear la prueba. Intentá de nuevo.';
+        trialErr.style.display = 'block';
+        trialBtn.disabled = false;
+        trialSpin.style.display = 'none';
+        trialBtn.querySelector('.lg-trial-text').textContent = 'Iniciar prueba gratuita →';
+      }
+    } catch(e) {
+      trialErr.textContent = '⚠️ Error de conexión. Verificá tu internet.';
+      trialErr.style.display = 'block';
+      trialBtn.disabled = false;
+      trialSpin.style.display = 'none';
+      trialBtn.querySelector('.lg-trial-text').textContent = 'Iniciar prueba gratuita →';
+    }
+  }
+
+  if (trialBtn)   trialBtn.addEventListener('click', _startTrial);
+  if (trialEmail) trialEmail.addEventListener('keydown', e => { if(e.key==='Enter') _startTrial(); });
+
   async function _validateKey() {
     const key = inp.value.trim().toUpperCase();
     if (!key) { err.textContent = 'Ingresá tu código de acceso'; err.style.display='block'; return; }
@@ -2905,6 +2987,9 @@ function _licenseGate() {
         localStorage.setItem('sm_lic_ok',  '1');
         localStorage.setItem('sm_lic_ts',  String(Date.now()));
         if (data.email) localStorage.setItem('sm_lic_email', data.email);
+        // Guardar nombre/tienda si lo ingresó
+        const nameVal = (document.getElementById('lgName')?.value || '').trim();
+        if (nameVal) localStorage.setItem('sm_lic_name', nameVal);
         // Animación de éxito y desbloqueo
         gate.style.transition = 'opacity .4s ease';
         gate.style.opacity = '0';
@@ -2944,8 +3029,29 @@ function _licenseGate() {
   }
 }
 
+// fix #11: HTML escape helper to prevent XSS from localStorage values
+function _esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 function _unlockApp(key) {
   document.getElementById('appRoot').style.display = 'flex';
+  // Cargar créditos de imagen al arrancar
+  setTimeout(loadImageCredits, 300);
+  // Saludo personalizado
+  const name    = localStorage.getItem('sm_lic_name')  || '';
+  const isTrial = localStorage.getItem('sm_lic_trial') === '1';
+  const greet   = document.getElementById('greetingSlot');
+  if (greet) {
+    if (isTrial) {
+      greet.style.background = 'rgba(72,187,120,.07)';
+      greet.style.border     = '1px solid rgba(72,187,120,.2)';
+      greet.innerHTML = `🎁 Modo Prueba${name ? ` · ¡Hola, <strong>${_esc(name)}</strong>!` : ''}<br>
+        <span style="font-size:10px;color:#68d391;font-weight:400">5 créditos imagen · 7 días gratuitos</span>`;
+      greet.style.display = 'block';
+    } else if (name) {
+      greet.innerHTML = `👋 ¡Hola, <strong>${_esc(name)}</strong>!<br><span style="font-size:10px;color:#a78bfa;font-weight:400">Listo para vender más hoy 🚀</span>`;
+      greet.style.display = 'block';
+    }
+  }
   // Mostrar email del usuario en el sidebar si está guardado
   const email = localStorage.getItem('sm_lic_email');
   if (email) {
@@ -2962,6 +3068,8 @@ function _unlockApp(key) {
       localStorage.removeItem('sm_lic_ok');
       localStorage.removeItem('sm_lic_ts');
       localStorage.removeItem('sm_lic_email');
+      localStorage.removeItem('sm_lic_name');
+      localStorage.removeItem('sm_lic_trial');
       location.reload();
     });
   }
@@ -3000,6 +3108,13 @@ if (document.readyState === 'loading') {
         onfocus="this.style.borderColor='rgba(99,179,237,.5)'"
         onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
 
+      <div style="font-size:12px;font-weight:700;color:#e2e8f0;margin:16px 0 6px">¿Cómo te llamamos?</div>
+      <div style="font-size:11px;color:#718096;margin-bottom:10px">Tu nombre o el nombre de tu tienda</div>
+      <input id="lgName" type="text" placeholder="Ej: Tienda El Garage" maxlength="60"
+        style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#e2e8f0;font-size:14px;font-weight:500;padding:11px 14px;outline:none;font-family:inherit;transition:border .2s"
+        onfocus="this.style.borderColor='rgba(183,148,244,.5)'"
+        onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+
       <div id="lgErr" style="display:none;margin-top:8px;font-size:11px;color:#fc8181;padding:8px 10px;background:rgba(252,129,129,.08);border-radius:8px;border:1px solid rgba(252,129,129,.15)"></div>
 
       <button id="lgBtn" style="margin-top:14px;width:100%;background:linear-gradient(135deg,#2563eb,#4f46e5);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;padding:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
@@ -3008,10 +3123,32 @@ if (document.readyState === 'loading') {
       </button>
     </div>
 
-    <!-- Separador -->
-    <div style="display:flex;align-items:center;gap:12px;width:100%;margin:20px 0">
+    <!-- Separador trial -->
+    <div style="display:flex;align-items:center;gap:12px;width:100%;margin:20px 0 14px">
       <div style="flex:1;height:1px;background:rgba(255,255,255,0.07)"></div>
-      <div style="font-size:11px;color:#4a5568">¿No tenés acceso?</div>
+      <div style="font-size:11px;color:#4a5568">¿Primera vez acá?</div>
+      <div style="flex:1;height:1px;background:rgba(255,255,255,0.07)"></div>
+    </div>
+
+    <!-- Card prueba gratis -->
+    <div style="width:100%;background:rgba(72,187,120,.06);border:1px solid rgba(72,187,120,.2);border-radius:14px;padding:20px;margin-bottom:16px">
+      <div style="font-size:17px;font-weight:800;color:#68d391;margin-bottom:3px">🎁 Probá gratis 7 días</div>
+      <div style="font-size:11px;color:#718096;margin-bottom:14px">Sin tarjeta · 5 créditos de imágenes IA incluidos · Acceso a todas las herramientas</div>
+      <input id="lgTrialEmail" type="email" placeholder="tu@email.com" maxlength="254"
+        style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#e2e8f0;font-size:14px;padding:11px 14px;outline:none;font-family:inherit;transition:border .2s;margin-bottom:10px"
+        onfocus="this.style.borderColor='rgba(72,187,120,.5)'"
+        onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      <div id="lgTrialErr" style="display:none;margin-bottom:8px;font-size:11px;color:#fc8181;padding:8px 10px;background:rgba(252,129,129,.08);border-radius:8px;border:1px solid rgba(252,129,129,.15)"></div>
+      <button id="lgTrialBtn" style="width:100%;background:linear-gradient(135deg,#276749,#2f855a);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        <svg id="lgTrialSpin" style="display:none;width:15px;height:15px;animation:spin 1s linear infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/></svg>
+        <span class="lg-trial-text">Iniciar prueba gratuita →</span>
+      </button>
+    </div>
+
+    <!-- Separador comprar -->
+    <div style="display:flex;align-items:center;gap:12px;width:100%;margin:4px 0 14px">
+      <div style="flex:1;height:1px;background:rgba(255,255,255,0.07)"></div>
+      <div style="font-size:11px;color:#4a5568">o comprá acceso completo</div>
       <div style="flex:1;height:1px;background:rgba(255,255,255,0.07)"></div>
     </div>
 

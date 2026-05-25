@@ -1,4 +1,23 @@
+# Environment — NUNCA subir al repo
 .env
 .env.local
-node_modules/
+.env.*.local
+*.env
+
+# Archivos temporales y de prueba (pueden contener keys/datos sensibles)
+*.txt
+*.log
+*.tmp
+*.temp
+test-*
+
+# Sistema
 .DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Vercel
+.vercel

@@ -1,15 +1,31 @@
 // api/send-license-email.js — Vercel Serverless Function
 // Called by Make.com after Supabase license creation to send the welcome email.
 // Requires env var: RESEND_API_KEY  (free at resend.com — 3,000 emails/month)
+// Requires env var: MAKE_SECRET     (shared secret with Make.com to authenticate calls)
+
+import { applyCorsHeaders, sanitizeString, escapeHtml } from './_security.js';
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-make-secret');
+  // ── CORS (fix #1: allowlist instead of *) ─────────────────────────────────
+  applyCorsHeaders(req, res);
+
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { to, key, plan } = req.body || {};
+  // ── fix #3: Authenticate Make.com requests with shared secret ─────────────
+  const makeSecret = process.env.MAKE_SECRET;
+  if (makeSecret) {
+    // Only enforce if MAKE_SECRET is set (backward compat during initial deploy)
+    const incoming = req.headers['x-make-secret'];
+    if (!incoming || incoming !== makeSecret) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+  }
+
+  // fix #7: sanitize all inputs
+  const to   = sanitizeString((req.body?.to   || ''), 254);
+  const key  = sanitizeString((req.body?.key  || ''), 60);
+  const plan = sanitizeString((req.body?.plan || ''), 20);
 
   if (!to || !key) {
     return res.status(400).json({ error: 'Missing required fields: to, key' });
@@ -17,11 +33,15 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.error('RESEND_API_KEY not configured');
-    return res.status(500).json({ error: 'Email service not configured' });
+    console.error('[SpaceMELI/send-license-email] RESEND_API_KEY not configured');
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 
   const expiresLabel = plan === 'yearly' ? '12 meses' : '30 días';
+
+  // Use escapeHtml() on any user-supplied values injected into the HTML (fix #8 / defense-in-depth)
+  const safeKey = escapeHtml(key);
+  const safeTo  = escapeHtml(to);
 
   const html = `
 <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#fff">
@@ -30,7 +50,7 @@ export default async function handler(req, res) {
 
   <div style="background:#f3f4f6;border-radius:12px;padding:24px;text-align:center;margin:24px 0">
     <p style="color:#6b7280;font-size:13px;margin:0 0 8px">TU CLAVE DE LICENCIA</p>
-    <code style="font-size:22px;font-weight:bold;letter-spacing:3px;color:#1f2937">${key}</code>
+    <code style="font-size:22px;font-weight:bold;letter-spacing:3px;color:#1f2937">${safeKey}</code>
   </div>
 
   <h3 style="color:#374151">¿Cómo activarla?</h3>
@@ -58,9 +78,9 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'Space MELI <onboarding@resend.dev>',
-        to: [to],
-        subject: `🚀 Tu licencia de Space MELI — ${key}`,
+        from:    'Space MELI <onboarding@resend.dev>',
+        to:      [safeTo],
+        subject: `🚀 Tu licencia de Space MELI — ${safeKey}`,
         html
       })
     });
@@ -68,13 +88,16 @@ export default async function handler(req, res) {
     const result = await emailRes.json();
 
     if (!emailRes.ok) {
-      console.error('Resend error:', result);
-      return res.status(502).json({ error: 'Email delivery failed', details: result });
+      // fix #8: log real error, generic message to client
+      console.error('[SpaceMELI/send-license-email] Resend error:', result);
+      return res.status(502).json({ error: 'Error interno del servidor' });
     }
 
-    return res.json({ ok: true, id: result.id, to, key });
+    return res.json({ ok: true, id: result.id, to: safeTo, key: safeKey });
+
   } catch (err) {
-    console.error('Send error:', err);
-    return res.status(500).json({ error: 'Server error', message: err.message });
+    // fix #8: log real error, generic message to client
+    console.error('[SpaceMELI/send-license-email] Error:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 }

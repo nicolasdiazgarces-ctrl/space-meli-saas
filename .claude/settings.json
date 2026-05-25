@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=\"${CLAUDE_FILE_PATH:-}\"; if [ -n \"$FILE\" ]; then if echo \"$FILE\" | grep -qiE '\\.env($|\\.|local|prod|staging)'; then echo '{\"decision\":\"block\",\"reason\":\"Escritura de archivos .env bloqueada por política de seguridad. Usá el dashboard de Vercel para variables de entorno.\"}'; exit 0; fi; fi; echo '{\"decision\":\"approve\"}'",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=\"${CLAUDE_TOOL_INPUT:-}\"; DANGEROUS=$(echo \"$CMD\" | grep -iE '(rm -rf|git push --force|git reset --hard|DROP TABLE|DELETE FROM licenses|curl.*-d.*secret)' | head -1 || true); if [ -n \"$DANGEROUS\" ]; then echo \"{\\\"decision\\\":\\\"block\\\",\\\"reason\\\":\\\"Comando peligroso detectado: $DANGEROUS\\\"}\"; exit 0; fi; echo '{\"decision\":\"approve\"}'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=\"${CLAUDE_FILE_PATH:-}\"; if [ -n \"$FILE\" ] && [ -f \"$FILE\" ]; then if grep -qiE '(sk-[a-zA-Z0-9]{32,}|SUPABASE_SERVICE_KEY\\s*=|TOGETHER_API_KEY\\s*=|RESEND_API_KEY\\s*=)' \"$FILE\" 2>/dev/null; then echo \"⚠️  ADVERTENCIA: Posible API key detectada en $FILE — revisá antes de commitear\"; fi; fi",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
