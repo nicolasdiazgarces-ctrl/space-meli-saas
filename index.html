@@ -279,23 +279,24 @@ select.dims-input{text-align:left;padding-left:6px;cursor:pointer}
 .btn-hamburger:hover{background:rgba(255,255,255,.06)}
 
 /* ── OVERLAY sidebar en mobile ──────────────────────────────────────────── */
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,16,.8);z-index:400;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,16,.75);z-index:9000}
 .sidebar-overlay.open{display:block}
 
 /* ── RESPONSIVE MÓVIL ───────────────────────────────────────────────────── */
 @media (max-width:768px){
   html,body{overflow:auto;height:auto}
 
-  /* Layout raíz */
-  .app{flex-direction:column;height:auto;min-height:100dvh;overflow:visible}
+  /* Layout raíz: quitar overflow:hidden para que el sidebar fixed no se corte en iOS */
+  .app{flex-direction:column;height:auto;min-height:100dvh;overflow:visible;position:static}
 
-  /* Sidebar → drawer lateral */
+  /* Sidebar → drawer lateral (z-index mayor que el overlay) */
   .sidebar{
     position:fixed;top:0;left:0;bottom:0;
-    width:82vw;max-width:300px;z-index:500;
+    width:82vw;max-width:300px;z-index:9100;
     transform:translateX(-110%);
     transition:transform .28s cubic-bezier(.4,0,.2,1);
-    overflow-y:auto;overflow-x:hidden
+    overflow-y:auto;overflow-x:hidden;
+    background:rgba(4,4,16,.99)
   }
   .sidebar.mob-open{transform:translateX(0)}
 
@@ -393,11 +394,11 @@ select.dims-input{text-align:left;padding-left:6px;cursor:pointer}
   </div>
 </div>
 
-<!-- OVERLAY sidebar mobile -->
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
 <!-- APP -->
 <div class="app" id="appRoot" style="display:none">
+
+  <!-- OVERLAY sidebar mobile — DEBE estar dentro de .app para compartir stacking context -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- SIDEBAR -->
   <div class="sidebar">
