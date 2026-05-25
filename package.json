@@ -1,0 +1,7 @@
+{
+  "name": "space-meli",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Space MELI — Herramienta SaaS para vendedores en MercadoLibre Chile",
+  "engines": { "node": ">=18" }
+}
